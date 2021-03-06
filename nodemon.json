@@ -1,0 +1,5 @@
+{
+  "exec": "tsoa spec-and-routes && ts-node-dev --transpile-only src/index.ts",
+  "watch": ["src"],
+  "ext": "ts"
+}
