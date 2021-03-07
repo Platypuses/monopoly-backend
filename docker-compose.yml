@@ -1,0 +1,23 @@
+version: "3.3"
+
+services:
+  postgres-service:
+    image: postgres:13.2
+    container_name: postgres-service
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: monopoly
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - monopoly-app-network
+
+volumes:
+  postgres-data:
+
+networks:
+  monopoly-app-network:

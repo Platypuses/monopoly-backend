@@ -1,9 +1,6 @@
 # WebStorm
 .idea
 
-# TSOA
-tsoa
-
 # Logs
 logs
 *.log

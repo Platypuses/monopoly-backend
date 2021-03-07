@@ -2,8 +2,7 @@
   "name": "monopoly-backend",
   "version": "1.0.0",
   "description": "Monopoly back-end",
-  "main": "dist/index.js",
-  "type": "module",
+  "main": "dist/src/index.js",
   "author": "Platypuses",
   "license": "MIT",
   "engines": {
@@ -23,8 +22,11 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "log4js": "^6.3.0",
+    "pg": "^8.5.1",
+    "reflect-metadata": "^0.1.13",
     "swagger-ui-express": "^4.1.6",
-    "tsoa": "^3.5.2"
+    "tsoa": "^3.5.2",
+    "typeorm": "^0.2.31"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.0",
