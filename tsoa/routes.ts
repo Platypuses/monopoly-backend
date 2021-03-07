@@ -12,9 +12,9 @@ const models: TsoaRoute.Models = {
     "UserResponseDto": {
         "dataType": "refObject",
         "properties": {
-            "id": {"dataType":"double"},
-            "email": {"dataType":"string"},
-            "name": {"dataType":"string"},
+            "id": {"dataType":"double","required":true},
+            "email": {"dataType":"string","required":true},
+            "name": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },

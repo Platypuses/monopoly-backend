@@ -2,6 +2,9 @@ import { getRepository } from 'typeorm';
 import UserResponseDto from '../models/responses/UserResponseDto';
 import UserRequestDto from '../models/requests/UserRequestDto';
 import User from '../models/entities/User';
+import ClientError from '../models/error/ClientError';
+
+const USER_NOT_FOUND_ERROR_MESSAGE = 'User not found';
 
 export default {
   async createUser(userRequestDto: UserRequestDto): Promise<UserResponseDto> {
@@ -17,7 +20,7 @@ export default {
       .findOne(userId);
 
     if (user === undefined) {
-      throw new Error('User not found');
+      throw new ClientError(USER_NOT_FOUND_ERROR_MESSAGE);
     }
 
     return user;

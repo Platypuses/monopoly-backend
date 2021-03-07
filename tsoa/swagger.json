@@ -19,6 +19,11 @@
 						"type": "string"
 					}
 				},
+				"required": [
+					"id",
+					"email",
+					"name"
+				],
 				"type": "object",
 				"additionalProperties": false
 			},

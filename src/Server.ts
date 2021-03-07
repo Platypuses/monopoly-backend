@@ -1,5 +1,7 @@
 import 'reflect-metadata';
-import express, { Express, Request, Response } from 'express';
+import express, {
+  Express, NextFunction, Request, Response,
+} from 'express';
 import bodyParser from 'body-parser';
 import swaggerUi from 'swagger-ui-express';
 import { createConnection } from 'typeorm';
@@ -16,6 +18,8 @@ import {
 import logger from './main/config/logger';
 import User from './main/models/entities/User';
 import CreateUsersTable1615108604961 from './resources/migrations/CreateUsersTable1615108604961';
+import ErrorResponseDto from './main/models/responses/ErrorResponseDto';
+import ErrorHandler from './main/models/error/ErrorHandler';
 
 export default class Server {
   private readonly app: Express;
@@ -31,6 +35,7 @@ export default class Server {
     await Server.configureDatabaseConnection();
     this.configureSwaggerUI();
     RegisterRoutes(this.app);
+    this.configureErrorHandler();
   }
 
   private static async configureDatabaseConnection() {
@@ -58,6 +63,14 @@ export default class Server {
       const swaggerUiHtml = swaggerUi.generateHTML(await import('../tsoa/swagger.json'));
       res.send(swaggerUiHtml);
     });
+  }
+
+  private configureErrorHandler() {
+    this.app.use(
+      (
+        error: unknown, req: Request, res: Response<ErrorResponseDto>, next: NextFunction,
+      ) => ErrorHandler.handleError(error, req, res, next),
+    );
   }
 
   public start() {
