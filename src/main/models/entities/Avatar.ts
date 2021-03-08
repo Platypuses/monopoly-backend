@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import User from './User';
-import MediaType from './enums/MediaType';
+import AvatarMediaType from './enums/AvatarMediaType';
 
 @Entity('avatars')
 export default class Avatar {
@@ -16,8 +16,8 @@ export default class Avatar {
   @Column('text')
   filePath!: string;
 
-  @Column({ type: 'enum', enum: MediaType })
-  mediaType!: MediaType;
+  @Column({ type: 'enum', enum: AvatarMediaType })
+  mediaType!: AvatarMediaType;
 
   @OneToOne(() => User, (user) => user.avatar, {
     nullable: false,
