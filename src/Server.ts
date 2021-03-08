@@ -1,10 +1,9 @@
 import 'reflect-metadata';
-import express, {
-  Express, NextFunction, Request, Response,
-} from 'express';
+import express, { Express, NextFunction, Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import swaggerUi from 'swagger-ui-express';
 import { createConnection } from 'typeorm';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { RegisterRoutes } from '../tsoa/routes';
 import {
   PORT,
@@ -16,8 +15,6 @@ import {
   SWAGGER_PATH,
 } from './main/config/appConfigProperties';
 import logger from './main/config/logger';
-import User from './main/models/entities/User';
-import CreateUsersTable1615108604961 from './resources/migrations/CreateUsersTable1615108604961';
 import ErrorResponseDto from './main/models/responses/ErrorResponseDto';
 import ErrorHandler from './main/models/error/ErrorHandler';
 
@@ -46,39 +43,46 @@ export default class Server {
       username: POSTGRES_DB_USERNAME,
       password: POSTGRES_DB_PASSWORD,
       database: POSTGRES_DB_NAME,
-      entities: [
-        User,
-      ],
-      migrations: [
-        CreateUsersTable1615108604961,
-      ],
+      entities: ['dist/src/main/models/entities/*.js'],
+      migrations: ['dist/src/resources/migrations/*.js'],
+      logging: ['schema', 'info', 'error'],
       synchronize: false,
+      namingStrategy: new SnakeNamingStrategy(),
     });
 
     await connection.runMigrations({ transaction: 'all' });
   }
 
   private configureSwaggerUI() {
-    this.app.use(SWAGGER_PATH, swaggerUi.serve, async (_req: Request, res: Response) => {
-      const swaggerUiHtml = swaggerUi.generateHTML(await import('../tsoa/swagger.json'));
-      res.send(swaggerUiHtml);
-    });
+    this.app.use(
+      SWAGGER_PATH,
+      swaggerUi.serve,
+      async (_req: Request, res: Response) => {
+        const swaggerUiHtml = swaggerUi.generateHTML(
+          await import('../tsoa/swagger.json')
+        );
+
+        res.send(swaggerUiHtml);
+      }
+    );
   }
 
   private configureErrorHandler() {
     this.app.use(
       (
-        error: unknown, req: Request, res: Response<ErrorResponseDto>, next: NextFunction,
-      ) => ErrorHandler.handleError(error, req, res, next),
+        error: unknown,
+        req: Request,
+        res: Response<ErrorResponseDto>,
+        next: NextFunction
+      ) => ErrorHandler.handleError(error, req, res, next)
     );
   }
 
-  public start() {
-    this.app.listen(
-      PORT,
-      () => logger.info(
-        `App started. Swagger UI: http://localhost:${PORT}${SWAGGER_PATH}`,
-      ),
+  public start(): void {
+    this.app.listen(PORT, () =>
+      logger.info(
+        `App started. Swagger UI: http://localhost:${PORT}${SWAGGER_PATH}`
+      )
     );
   }
 }
