@@ -3,6 +3,7 @@ import logger from './main/config/logger';
 
 const server = new Server();
 
-server.configure()
+server
+  .configure()
   .then(() => server.start())
   .catch((error) => logger.error(error));

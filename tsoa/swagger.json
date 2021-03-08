@@ -5,45 +5,7 @@
 		"parameters": {},
 		"requestBodies": {},
 		"responses": {},
-		"schemas": {
-			"UserResponseDto": {
-				"properties": {
-					"id": {
-						"type": "number",
-						"format": "double"
-					},
-					"email": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"id",
-					"email",
-					"name"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"UserRequestDto": {
-				"properties": {
-					"email": {
-						"type": "string"
-					},
-					"name": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"email",
-					"name"
-				],
-				"type": "object",
-				"additionalProperties": false
-			}
-		},
+		"schemas": {},
 		"securitySchemes": {}
 	},
 	"info": {
@@ -60,47 +22,15 @@
 	"openapi": "3.0.0",
 	"paths": {
 		"/api/v1/users": {
-			"post": {
-				"operationId": "CreateUser",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/UserResponseDto"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"User Controller"
-				],
-				"security": [],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/UserRequestDto"
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v1/users/{userId}": {
 			"get": {
-				"operationId": "GetUser",
+				"operationId": "Test",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/UserResponseDto"
+									"type": "string"
 								}
 							}
 						}
@@ -110,17 +40,7 @@
 					"User Controller"
 				],
 				"security": [],
-				"parameters": [
-					{
-						"in": "path",
-						"name": "userId",
-						"required": true,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				]
+				"parameters": []
 			}
 		}
 	},
