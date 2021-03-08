@@ -15,22 +15,8 @@ import {
   SWAGGER_PATH,
 } from './main/config/appConfigProperties';
 import logger from './main/config/logger';
-import User from './main/models/entities/User';
 import ErrorResponseDto from './main/models/responses/ErrorResponseDto';
 import ErrorHandler from './main/models/error/ErrorHandler';
-import UserStatistics from './main/models/entities/UserStatistics';
-import Avatar from './main/models/entities/Avatar';
-import RefreshToken from './main/models/entities/RefreshToken';
-import Lobby from './main/models/entities/Lobby';
-import LobbyParticipant from './main/models/entities/LobbyParticipant';
-import LobbyMessage from './main/models/entities/LobbyMessage';
-import V1UsersTable1615214597840 from './resources/migrations/V1UsersTable1615214597840';
-import V2UserStatisticsTable1615214803032 from './resources/migrations/V2UserStatisticsTable1615214803032';
-import V3AvatarsTable1615214875576 from './resources/migrations/V3AvatarsTable1615214875576';
-import V4RefreshTokensTable1615214946258 from './resources/migrations/V4RefreshTokensTable1615214946258';
-import V5LobbiesTable1615215024008 from './resources/migrations/V5LobbiesTable1615215024008';
-import V6LobbyParticipantsTable1615215080790 from './resources/migrations/V6LobbyParticipantsTable1615215080790';
-import V7LobbyMessagesTable1615215122198 from './resources/migrations/V7LobbyMessagesTable1615215122198';
 
 export default class Server {
   private readonly app: Express;
@@ -57,25 +43,9 @@ export default class Server {
       username: POSTGRES_DB_USERNAME,
       password: POSTGRES_DB_PASSWORD,
       database: POSTGRES_DB_NAME,
-      entities: [
-        User,
-        Avatar,
-        UserStatistics,
-        RefreshToken,
-        Lobby,
-        LobbyParticipant,
-        LobbyMessage,
-      ],
-      migrations: [
-        V1UsersTable1615214597840,
-        V2UserStatisticsTable1615214803032,
-        V3AvatarsTable1615214875576,
-        V4RefreshTokensTable1615214946258,
-        V5LobbiesTable1615215024008,
-        V6LobbyParticipantsTable1615215080790,
-        V7LobbyMessagesTable1615215122198,
-      ],
-      logging: true,
+      entities: ['src/main/models/entities/*.ts'],
+      migrations: ['src/resources/migrations/*.ts'],
+      logging: ['schema', 'info', 'error'],
       synchronize: false,
       namingStrategy: new SnakeNamingStrategy(),
     });

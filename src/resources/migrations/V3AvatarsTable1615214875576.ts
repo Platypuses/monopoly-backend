@@ -1,5 +1,5 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
-import MigrationRunner from './MigrationRunner';
+import MigrationRunner from './utils/MigrationRunner';
 
 /* eslint-disable */
 

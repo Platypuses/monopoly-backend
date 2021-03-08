@@ -14,6 +14,6 @@ export class UserController extends Controller {
 
   @Get()
   public async test(): Promise<string> {
-    return this.userService.toString();
+    return this.userService.test();
   }
 }
