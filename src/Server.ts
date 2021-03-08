@@ -1,10 +1,9 @@
 import 'reflect-metadata';
-import express, {
-  Express, NextFunction, Request, Response,
-} from 'express';
+import express, { Express, NextFunction, Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import swaggerUi from 'swagger-ui-express';
 import { createConnection } from 'typeorm';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { RegisterRoutes } from '../tsoa/routes';
 import {
   PORT,
@@ -17,9 +16,21 @@ import {
 } from './main/config/appConfigProperties';
 import logger from './main/config/logger';
 import User from './main/models/entities/User';
-import CreateUsersTable1615108604961 from './resources/migrations/CreateUsersTable1615108604961';
 import ErrorResponseDto from './main/models/responses/ErrorResponseDto';
 import ErrorHandler from './main/models/error/ErrorHandler';
+import UserStatistics from './main/models/entities/UserStatistics';
+import Avatar from './main/models/entities/Avatar';
+import RefreshToken from './main/models/entities/RefreshToken';
+import Lobby from './main/models/entities/Lobby';
+import LobbyParticipant from './main/models/entities/LobbyParticipant';
+import LobbyMessage from './main/models/entities/LobbyMessage';
+import V1UsersTable1615214597840 from './resources/migrations/V1UsersTable1615214597840';
+import V2UserStatisticsTable1615214803032 from './resources/migrations/V2UserStatisticsTable1615214803032';
+import V3AvatarsTable1615214875576 from './resources/migrations/V3AvatarsTable1615214875576';
+import V4RefreshTokensTable1615214946258 from './resources/migrations/V4RefreshTokensTable1615214946258';
+import V5LobbiesTable1615215024008 from './resources/migrations/V5LobbiesTable1615215024008';
+import V6LobbyParticipantsTable1615215080790 from './resources/migrations/V6LobbyParticipantsTable1615215080790';
+import V7LobbyMessagesTable1615215122198 from './resources/migrations/V7LobbyMessagesTable1615215122198';
 
 export default class Server {
   private readonly app: Express;
@@ -48,37 +59,60 @@ export default class Server {
       database: POSTGRES_DB_NAME,
       entities: [
         User,
+        Avatar,
+        UserStatistics,
+        RefreshToken,
+        Lobby,
+        LobbyParticipant,
+        LobbyMessage,
       ],
       migrations: [
-        CreateUsersTable1615108604961,
+        V1UsersTable1615214597840,
+        V2UserStatisticsTable1615214803032,
+        V3AvatarsTable1615214875576,
+        V4RefreshTokensTable1615214946258,
+        V5LobbiesTable1615215024008,
+        V6LobbyParticipantsTable1615215080790,
+        V7LobbyMessagesTable1615215122198,
       ],
+      logging: true,
       synchronize: false,
+      namingStrategy: new SnakeNamingStrategy(),
     });
 
     await connection.runMigrations({ transaction: 'all' });
   }
 
   private configureSwaggerUI() {
-    this.app.use(SWAGGER_PATH, swaggerUi.serve, async (_req: Request, res: Response) => {
-      const swaggerUiHtml = swaggerUi.generateHTML(await import('../tsoa/swagger.json'));
-      res.send(swaggerUiHtml);
-    });
+    this.app.use(
+      SWAGGER_PATH,
+      swaggerUi.serve,
+      async (_req: Request, res: Response) => {
+        const swaggerUiHtml = swaggerUi.generateHTML(
+          await import('../tsoa/swagger.json')
+        );
+
+        res.send(swaggerUiHtml);
+      }
+    );
   }
 
   private configureErrorHandler() {
     this.app.use(
       (
-        error: unknown, req: Request, res: Response<ErrorResponseDto>, next: NextFunction,
-      ) => ErrorHandler.handleError(error, req, res, next),
+        error: unknown,
+        req: Request,
+        res: Response<ErrorResponseDto>,
+        next: NextFunction
+      ) => ErrorHandler.handleError(error, req, res, next)
     );
   }
 
-  public start() {
-    this.app.listen(
-      PORT,
-      () => logger.info(
-        `App started. Swagger UI: http://localhost:${PORT}${SWAGGER_PATH}`,
-      ),
+  public start(): void {
+    this.app.listen(PORT, () =>
+      logger.info(
+        `App started. Swagger UI: http://localhost:${PORT}${SWAGGER_PATH}`
+      )
     );
   }
 }
