@@ -28,7 +28,8 @@
     "reflect-metadata": "^0.1.13",
     "swagger-ui-express": "^4.1.6",
     "tsoa": "^3.5.2",
-    "typeorm": "^0.2.31"
+    "typeorm": "^0.2.31",
+    "typeorm-naming-strategies": "^2.0.0"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.0",
