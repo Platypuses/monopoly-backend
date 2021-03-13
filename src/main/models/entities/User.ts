@@ -10,6 +10,7 @@ import Avatar from './Avatar';
 import RefreshToken from './RefreshToken';
 import LobbyParticipant from './LobbyParticipant';
 import LobbyMessage from './LobbyMessage';
+import AccountType from './enums/AccountType';
 
 @Entity('users')
 export default class User {
@@ -24,6 +25,9 @@ export default class User {
 
   @Column('timestamp')
   registrationDate!: Date;
+
+  @Column({ type: 'enum', enum: AccountType })
+  accountType!: AccountType;
 
   @OneToOne(() => Avatar, (avatar) => avatar.user, {
     cascade: true,

@@ -12,8 +12,8 @@
   "scripts": {
     "postinstall": "husky install",
     "prebuild": "yarn install && tsoa spec-and-routes && yarn lint",
-    "lint": "eslint --cache --ext .ts .",
-    "lint:fix": "eslint --fix --cache --ext .ts .",
+    "lint": "eslint --ext .ts .",
+    "lint:fix": "eslint --fix --ext .ts .",
     "build": "tsc",
     "postbuild": "copyfiles src/**/*.sql dist",
     "prestart": "yarn build",
