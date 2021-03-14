@@ -17,6 +17,13 @@ import {
 import logger from './main/config/logger';
 import ErrorResponseDto from './main/models/responses/ErrorResponseDto';
 import ErrorHandler from './main/models/error/ErrorHandler';
+import User from './main/models/entities/User';
+import UserStatistics from './main/models/entities/UserStatistics';
+import Avatar from './main/models/entities/Avatar';
+import RefreshToken from './main/models/entities/RefreshToken';
+import Lobby from './main/models/entities/Lobby';
+import LobbyParticipant from './main/models/entities/LobbyParticipant';
+import LobbyMessage from './main/models/entities/LobbyMessage';
 
 export default class Server {
   private readonly app: Express;
@@ -43,8 +50,16 @@ export default class Server {
       username: POSTGRES_DB_USERNAME,
       password: POSTGRES_DB_PASSWORD,
       database: POSTGRES_DB_NAME,
-      entities: ['dist/src/main/models/entities/*.js'],
-      migrations: ['dist/src/resources/migrations/*.js'],
+      entities: [
+        User,
+        UserStatistics,
+        Avatar,
+        RefreshToken,
+        Lobby,
+        LobbyParticipant,
+        LobbyMessage,
+      ],
+      migrations: ['**/migrations/*.js'],
       logging: ['schema', 'info', 'error'],
       synchronize: false,
       namingStrategy: new SnakeNamingStrategy(),
