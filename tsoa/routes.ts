@@ -9,6 +9,11 @@ import * as express from 'express';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
+    "StatusCodes": {
+        "dataType": "refEnum",
+        "enums": [202,502,400,409,100,201,417,424,403,504,410,505,418,419,507,500,411,423,420,405,301,302,207,300,511,204,203,406,404,501,304,200,206,402,308,412,428,102,407,431,408,413,414,416,205,303,503,101,307,429,401,451,422,415,305],
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 };
 const validationService = new ValidationService(models);
 
@@ -22,6 +27,8 @@ export function RegisterRoutes(app: express.Router) {
         app.get('/api/v1/users',
             function (request: any, response: any, next: any) {
             const args = {
+                    userName: {"in":"query","name":"userName","required":true,"dataType":"string"},
+                    password: {"in":"query","name":"password","required":true,"dataType":"string"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -37,6 +44,29 @@ export function RegisterRoutes(app: express.Router) {
 
 
             const promise = controller.test.apply(controller, validatedArgs as any);
+            promiseHandler(controller, promise, response, undefined, next);
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/api/v1/users',
+            function (request: any, response: any, next: any) {
+            const args = {
+                    userName: {"in":"query","name":"userName","required":true,"dataType":"string"},
+                    password: {"in":"query","name":"password","required":true,"dataType":"string"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+            } catch (err) {
+                return next(err);
+            }
+
+            const controller = new UserController();
+
+
+            const promise = controller.registerUser.apply(controller, validatedArgs as any);
             promiseHandler(controller, promise, response, undefined, next);
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
