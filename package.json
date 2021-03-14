@@ -10,8 +10,7 @@
     "node": ">=14.15.5"
   },
   "scripts": {
-    "postinstall": "husky install",
-    "prebuild": "yarn install && tsoa spec-and-routes && yarn lint",
+    "prebuild": "yarn install && husky install && tsoa spec-and-routes && yarn lint",
     "lint": "eslint --ext .ts .",
     "lint:fix": "eslint --fix --ext .ts .",
     "build": "tsc",

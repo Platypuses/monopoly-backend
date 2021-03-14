@@ -1,7 +1,7 @@
-import { Controller, Get, Route, Tags } from 'tsoa';
+import { Controller, Get, Request, Route, Security, Tags } from 'tsoa';
 import UserService from '../services/UserService';
-import TokensPairResponseDto from '../models/responses/TokensPairResponseDto';
-import TokenService from '../services/TokenService';
+import { RequestWithUser } from '../security/JwtAuthMiddleware';
+import UserResponseDto from '../models/responses/UserResponseDto';
 
 @Route('/api/v1/users')
 @Tags('User Controller')
@@ -9,21 +9,16 @@ import TokenService from '../services/TokenService';
 export class UserController extends Controller {
   private readonly userService;
 
-  private readonly tokenService;
-
   constructor() {
     super();
     this.userService = UserService;
-    this.tokenService = TokenService;
   }
 
-  @Get()
-  public async test(): Promise<string> {
-    return this.userService.test();
-  }
-
-  @Get('tokens')
-  public async testTokens(): Promise<TokensPairResponseDto> {
-    return this.tokenService.generateTokens(1);
+  @Get('/me')
+  @Security('JWT')
+  public async getAuthenticatedUser(
+    @Request() request: RequestWithUser
+  ): Promise<UserResponseDto> {
+    return this.userService.getUser(request.user.id);
   }
 }

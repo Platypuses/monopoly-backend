@@ -37,3 +37,6 @@ export const REFRESH_TOKEN_SIGN_KEY =
 export const ACCESS_TOKEN_LIFETIME = process.env.ACCESS_TOKEN_LIFETIME || '2h';
 export const REFRESH_TOKEN_LIFETIME =
   process.env.REFRESH_TOKEN_LIFETIME || '30d';
+
+export const ACCESS_TOKEN_HEADER =
+  process.env.ACCESS_TOKEN_HEADER || 'Authorization';

@@ -15,8 +15,8 @@ import logger from '../config/logger';
 import RefreshToken from '../models/entities/RefreshToken';
 import ClientError from '../models/error/ClientError';
 
-const INVALID_REFRESH_TOKEN_ERROR = 'Invalid refresh token';
-const TOKEN_VERIFICATION_FAILED_ERROR = 'Token verification failed';
+const INVALID_REFRESH_TOKEN_ERROR = 'Недействительный refresh-токен';
+const TOKEN_VERIFICATION_FAILED_ERROR = 'Ошибка проверки токена';
 const JWT_ALGORITHM = 'HS512';
 
 async function generateToken(

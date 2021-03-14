@@ -1,15 +1,24 @@
 import { getRepository } from 'typeorm';
 import User from '../models/entities/User';
 import ClientError from '../models/error/ClientError';
+import UserResponseDto from '../models/responses/UserResponseDto';
+import logger from '../config/logger';
+
+const USER_DOES_NOT_EXIST = 'Пользователь не существует';
 
 export default {
-  async test(): Promise<string> {
-    const user = await getRepository(User).findOne(1);
+  async getUser(userId: number): Promise<UserResponseDto> {
+    const user = await getRepository(User).findOne(userId);
 
     if (user === undefined) {
-      throw new ClientError('Test Error');
+      throw new ClientError(USER_DOES_NOT_EXIST);
     }
 
-    return user.nickname;
+    logger.info(`Getting user information by id == ${userId}`);
+
+    return {
+      id: user.id,
+      nickname: user.nickname,
+    };
   },
 };

@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Route, Tags } from 'tsoa';
+import { Body, Controller, Get, Post, Query, Route, Tags } from 'tsoa';
 import RefreshTokensPairRequestDto from '../models/requests/RefreshTokensPairRequestDto';
 import TokensPairResponseDto from '../models/responses/TokensPairResponseDto';
 import TokenService from '../services/TokenService';
@@ -12,6 +12,13 @@ export class AuthController extends Controller {
   constructor() {
     super();
     this.tokenService = TokenService;
+  }
+
+  @Get('/tokens-pair')
+  public async getTokensPair(
+    @Query() userId: number
+  ): Promise<TokensPairResponseDto> {
+    return this.tokenService.generateTokens(userId);
   }
 
   @Post('/tokens-renewal')
