@@ -1,5 +1,6 @@
-import { Controller, Get, Route, Tags } from 'tsoa';
+import { Body, Controller, Get, Post, Route, Tags } from 'tsoa';
 import UserService from '../services/UserService';
+import UserRegistrationRequestDto from '../models/requests/UserRegistrationRequestDto';
 
 @Route('/api/v1/users')
 @Tags('User Controller')
@@ -15,5 +16,12 @@ export class UserController extends Controller {
   @Get()
   public async test(): Promise<string> {
     return this.userService.test();
+  }
+
+  @Post()
+  public async registerUser(
+    @Body() userRegistrationRequestDto: UserRegistrationRequestDto
+  ): Promise<void> {
+    await this.userService.createUser(userRegistrationRequestDto);
   }
 }
