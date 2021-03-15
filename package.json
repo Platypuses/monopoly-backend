@@ -10,8 +10,7 @@
     "node": ">=14.15.5"
   },
   "scripts": {
-    "postinstall": "husky install",
-    "prebuild": "yarn install && tsoa spec-and-routes && yarn lint",
+    "prebuild": "yarn install && husky install && tsoa spec-and-routes && yarn lint",
     "lint": "eslint --ext .ts .",
     "lint:fix": "eslint --fix --ext .ts .",
     "build": "tsc",
@@ -28,6 +27,7 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "http-status-codes": "^2.1.4",
+    "jose": "^3.8.0",
     "log4js": "^6.3.0",
     "pg": "^8.5.1",
     "reflect-metadata": "^0.1.13",

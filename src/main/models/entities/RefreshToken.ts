@@ -12,7 +12,7 @@ export default class RefreshToken {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ length: 50 })
+  @Column({ length: 200 })
   value!: string;
 
   @ManyToOne(() => User, (user) => user.refreshTokens, {

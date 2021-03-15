@@ -6,7 +6,52 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
-			"UserRequestDto": {
+			"TokensPairResponseDto": {
+				"properties": {
+					"accessToken": {
+						"type": "string"
+					},
+					"refreshToken": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"accessToken",
+					"refreshToken"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"RefreshTokensPairRequestDto": {
+				"properties": {
+					"refreshToken": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"refreshToken"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UserResponseDto": {
+				"properties": {
+					"id": {
+						"type": "number",
+						"format": "double"
+					},
+					"nickname": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"nickname"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UserRegistrationRequestDto": {
 				"properties": {
 					"nickname": {
 						"type": "string"
@@ -23,7 +68,13 @@
 				"additionalProperties": false
 			}
 		},
-		"securitySchemes": {}
+		"securitySchemes": {
+			"JWT": {
+				"type": "apiKey",
+				"in": "header",
+				"name": "Authorization"
+			}
+		}
 	},
 	"info": {
 		"title": "monopoly-backend",
@@ -38,16 +89,80 @@
 	},
 	"openapi": "3.0.0",
 	"paths": {
-		"/api/v1/users": {
+		"/api/v1/auth/tokens-pair": {
 			"get": {
-				"operationId": "Test",
+				"operationId": "GetTokensPair",
 				"responses": {
 					"200": {
 						"description": "Ok",
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/TokensPairResponseDto"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Auth Controller"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "userId",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/api/v1/auth/tokens-renewal": {
+			"post": {
+				"operationId": "GenerateTokensByRefreshToken",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TokensPairResponseDto"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Auth Controller"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RefreshTokensPairRequestDto"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/users/me": {
+			"get": {
+				"operationId": "GetAuthenticatedUser",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UserResponseDto"
 								}
 							}
 						}
@@ -56,7 +171,11 @@
 				"tags": [
 					"User Controller"
 				],
-				"security": [],
+				"security": [
+					{
+						"JWT": []
+					}
+				],
 				"parameters": []
 			},
 			"post": {
@@ -77,6 +196,31 @@
 						"application/json": {
 							"schema": {
 								"$ref": "#/components/schemas/UserRequestDto"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/users": {
+			"post": {
+				"operationId": "RegisterUser",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"User Controller"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UserRegistrationRequestDto"
 							}
 						}
 					}

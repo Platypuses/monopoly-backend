@@ -1,8 +1,8 @@
 create table refresh_tokens
 (
-    id      serial      not null,
-    value   varchar(50) not null,
-    user_id integer     not null,
+    id      serial       not null,
+    value   varchar(200) not null,
+    user_id integer      not null,
 
     constraint "PK_refresh_token_id" primary key (id),
 
