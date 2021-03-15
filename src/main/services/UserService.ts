@@ -9,6 +9,7 @@ import UserResponseDto from '../models/responses/UserResponseDto';
 
 const SALT_ROUNDS = 10;
 
+const USER_DOES_NOT_EXIST = 'Пользователь не существует';
 const FILL_ALL_FIELDS = 'Заполните все требуемые поля!';
 const NICKNAME_LENGTH_WARN = 'Никнейм должен быть длиной от 5 до 15 символов!';
 const PASSWORD_LENGTH_WARN = 'Пароль должен быть длиной от 5 до 30 символов!';
@@ -32,8 +33,6 @@ async function validateUserRegistration(nickname: string, password: string) {
   }
 }
 
-const USER_DOES_NOT_EXIST = 'Пользователь не существует';
-
 export default {
   async getUser(userId: number): Promise<UserResponseDto> {
     const user = await getRepository(User).findOne(userId);
@@ -48,6 +47,25 @@ export default {
       id: user.id,
       nickname: user.nickname,
     };
+  },
+
+  async createUser(
+    userRegistrationRequestDto: UserRegistrationRequestDto
+  ): Promise<void> {
+    const nickname = userRegistrationRequestDto.nickname.trim();
+    const password = userRegistrationRequestDto.password.trim();
+
+    await validateUserRegistration(nickname, password);
+
+    let user: User = new User();
+    user.nickname = nickname;
+    user.password = await Bcrypt.hash(password, SALT_ROUNDS);
+    user.accountType = AccountType.PERMANENT_ACCOUNT;
+    user.registrationDate = new Date();
+
+    user = await getRepository(User).save(user);
+
+    logger.info(`Created user '${user.nickname}' with id '${user.id}'.`);
   },
 
   async createUser(

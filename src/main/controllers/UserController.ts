@@ -40,4 +40,11 @@ export class UserController extends Controller {
     await this.userService.createUser(userRegistrationRequestDto);
     this.setStatus(StatusCodes.OK);
   }
+
+  @Post()
+  public async registerUser(
+    @Body() userRegistrationRequestDto: UserRegistrationRequestDto
+  ): Promise<void> {
+    await this.userService.createUser(userRegistrationRequestDto);
+  }
 }
