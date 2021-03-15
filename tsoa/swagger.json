@@ -6,65 +6,21 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
-			"StatusCodes": {
-				"enum": [
-					202,
-					502,
-					400,
-					409,
-					100,
-					201,
-					417,
-					424,
-					403,
-					504,
-					410,
-					505,
-					418,
-					419,
-					507,
-					500,
-					411,
-					423,
-					420,
-					405,
-					301,
-					302,
-					207,
-					300,
-					511,
-					204,
-					203,
-					406,
-					404,
-					501,
-					304,
-					200,
-					206,
-					402,
-					308,
-					412,
-					428,
-					102,
-					407,
-					431,
-					408,
-					413,
-					414,
-					416,
-					205,
-					303,
-					503,
-					101,
-					307,
-					429,
-					401,
-					451,
-					422,
-					415,
-					305
+			"UserRequestDto": {
+				"properties": {
+					"nickname": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"nickname",
+					"password"
 				],
-				"type": "number"
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
@@ -91,7 +47,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "boolean"
+									"type": "string"
 								}
 							}
 						}
@@ -101,61 +57,30 @@
 					"User Controller"
 				],
 				"security": [],
-				"parameters": [
-					{
-						"in": "query",
-						"name": "userName",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "query",
-						"name": "password",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				]
+				"parameters": []
 			},
 			"post": {
 				"operationId": "RegisterUser",
 				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/StatusCodes"
-								}
-							}
-						}
+					"204": {
+						"description": "No content"
 					}
 				},
 				"tags": [
 					"User Controller"
 				],
 				"security": [],
-				"parameters": [
-					{
-						"in": "query",
-						"name": "userName",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "query",
-						"name": "password",
-						"required": true,
-						"schema": {
-							"type": "string"
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UserRequestDto"
+							}
 						}
 					}
-				]
+				}
 			}
 		}
 	},

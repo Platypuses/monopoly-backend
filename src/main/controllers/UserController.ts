@@ -1,8 +1,6 @@
-import { Controller, Get, Post, Query, Route, Tags } from 'tsoa';
-import { StatusCodes } from 'http-status-codes';
+import { Body, Controller, Get, Post, Route, Tags } from 'tsoa';
 import UserService from '../services/UserService';
-import User from '../models/entities/User';
-import logger from '../config/logger';
+import UserRequestDto from '../models/requests/UserRequestDto';
 
 @Route('/api/v1/users')
 @Tags('User Controller')
@@ -22,16 +20,8 @@ export class UserController extends Controller {
 
   @Post()
   public async registerUser(
-    @Query() userName: string,
-    @Query() password: string
-  ): Promise<StatusCodes> {
-    const user: User = await this.userService.createUser(
-      userName.trim(),
-      password.trim()
-    );
-
-    logger.info(`Created user '${user.nickname}' with id '${user.id}'.`);
-
-    return StatusCodes.OK;
+    @Body() userRequestDto: UserRequestDto
+  ): Promise<void> {
+    return this.userService.createUser(userRequestDto);
   }
 }

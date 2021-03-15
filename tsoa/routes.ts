@@ -9,9 +9,13 @@ import * as express from 'express';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
-    "StatusCodes": {
-        "dataType": "refEnum",
-        "enums": [202,502,400,409,100,201,417,424,403,504,410,505,418,419,507,500,411,423,420,405,301,302,207,300,511,204,203,406,404,501,304,200,206,402,308,412,428,102,407,431,408,413,414,416,205,303,503,101,307,429,401,451,422,415,305],
+    "UserRequestDto": {
+        "dataType": "refObject",
+        "properties": {
+            "nickname": {"dataType":"string","required":true},
+            "password": {"dataType":"string","required":true},
+        },
+        "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 };
@@ -27,8 +31,6 @@ export function RegisterRoutes(app: express.Router) {
         app.get('/api/v1/users',
             function (request: any, response: any, next: any) {
             const args = {
-                    userName: {"in":"query","name":"userName","required":true,"dataType":"string"},
-                    password: {"in":"query","name":"password","required":true,"dataType":"string"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -50,8 +52,7 @@ export function RegisterRoutes(app: express.Router) {
         app.post('/api/v1/users',
             function (request: any, response: any, next: any) {
             const args = {
-                    userName: {"in":"query","name":"userName","required":true,"dataType":"string"},
-                    password: {"in":"query","name":"password","required":true,"dataType":"string"},
+                    userRequestDto: {"in":"body","name":"userRequestDto","required":true,"ref":"UserRequestDto"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

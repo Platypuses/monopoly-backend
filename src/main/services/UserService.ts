@@ -1,10 +1,35 @@
 import { getRepository } from 'typeorm';
-import Bcrypt from 'bcryptjs';
+import Bcrypt from 'bcrypt';
 import User from '../models/entities/User';
 import ClientError from '../models/error/ClientError';
 import AccountType from '../models/entities/enums/AccountType';
+import logger from '../config/logger';
+import UserRequestDto from '../models/requests/UserRequestDto';
 
-const HASH_SALT = 10;
+const SALT_ROUNDS = 10;
+
+const FILL_ALL_FIELDS = 'Заполните все требуемые поля!';
+const NICKNAME_LENGTH_WARN = 'Никнейм должен быть длиной от 5 до 15 символов!';
+const PASSWORD_LENGTH_WARN = 'Пароль должен быть длиной от 5 до 30 символов!';
+const NICKNAME_ALREADY_EXISTS = 'Пользователь с таким именем уже существует!';
+
+async function validateUserRegistration(nickname: string, password: string) {
+  if (!nickname || !password) {
+    throw new ClientError(FILL_ALL_FIELDS);
+  }
+
+  if (nickname.length < 5 || nickname.length > 15) {
+    throw new ClientError(NICKNAME_LENGTH_WARN);
+  }
+
+  if (password.length < 5 || password.length > 30) {
+    throw new ClientError(PASSWORD_LENGTH_WARN);
+  }
+
+  if (await getRepository(User).findOne({ nickname })) {
+    throw new ClientError(NICKNAME_ALREADY_EXISTS);
+  }
+}
 
 export default {
   async test(): Promise<string> {
@@ -17,33 +42,20 @@ export default {
     return user.nickname;
   },
 
-  async createUser(nickname: string, password: string): Promise<User> {
-    const userRepository = getRepository(User);
+  async createUser(userRequestDto: UserRequestDto): Promise<void> {
+    const nickname = userRequestDto.nickname.trim();
+    const password = userRequestDto.password.trim();
 
-    if (!nickname || !password) {
-      throw new ClientError('Заполните все требуемые поля!');
-    }
-
-    if (nickname.length < 5 || nickname.length > 15) {
-      throw new ClientError('Никнейм должен быть длиной от 5 до 15 символов!');
-    }
-
-    if (password.length < 5 || password.length > 30) {
-      throw new ClientError('Пароль должен быть длиной от 5 до 30 символов!');
-    }
-
-    if (await userRepository.findOne({ nickname })) {
-      throw new ClientError('Пользователь с таким именем уже существует!');
-    }
+    await validateUserRegistration(nickname, password);
 
     let user: User = new User();
     user.nickname = nickname;
-    user.password = Bcrypt.hashSync(password, HASH_SALT);
+    user.password = await Bcrypt.hash(password, SALT_ROUNDS);
     user.accountType = AccountType.PERMANENT_ACCOUNT;
     user.registrationDate = new Date();
 
-    user = await userRepository.save(user);
+    user = await getRepository(User).save(user);
 
-    return user;
+    logger.info(`Created user '${user.nickname}' with id '${user.id}'.`);
   },
 };
