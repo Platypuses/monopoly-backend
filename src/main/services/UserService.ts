@@ -4,7 +4,7 @@ import User from '../models/entities/User';
 import ClientError from '../models/error/ClientError';
 import AccountType from '../models/entities/enums/AccountType';
 import logger from '../config/logger';
-import UserRequestDto from '../models/requests/UserRequestDto';
+import UserRegistrationRequestDto from '../models/requests/UserRegistrationRequestDto';
 
 const SALT_ROUNDS = 10;
 
@@ -42,9 +42,11 @@ export default {
     return user.nickname;
   },
 
-  async createUser(userRequestDto: UserRequestDto): Promise<void> {
-    const nickname = userRequestDto.nickname.trim();
-    const password = userRequestDto.password.trim();
+  async createUser(
+    userRegistrationRequestDto: UserRegistrationRequestDto
+  ): Promise<void> {
+    const nickname = userRegistrationRequestDto.nickname.trim();
+    const password = userRegistrationRequestDto.password.trim();
 
     await validateUserRegistration(nickname, password);
 
