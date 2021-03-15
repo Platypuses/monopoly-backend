@@ -50,6 +50,22 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"UserRegistrationRequestDto": {
+				"properties": {
+					"nickname": {
+						"type": "string"
+					},
+					"password": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"nickname",
+					"password"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {
@@ -161,6 +177,31 @@
 					}
 				],
 				"parameters": []
+			}
+		},
+		"/api/v1/users": {
+			"post": {
+				"operationId": "RegisterUser",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"User Controller"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UserRegistrationRequestDto"
+							}
+						}
+					}
+				}
 			}
 		}
 	},

@@ -1,5 +1,16 @@
-import { Controller, Get, Request, Route, Security, Tags } from 'tsoa';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Request,
+  Route,
+  Security,
+  Tags,
+} from 'tsoa';
+import { StatusCodes } from 'http-status-codes';
 import UserService from '../services/UserService';
+import UserRegistrationRequestDto from '../models/requests/UserRegistrationRequestDto';
 import { RequestWithUser } from '../security/JwtAuthMiddleware';
 import UserResponseDto from '../models/responses/UserResponseDto';
 
@@ -20,5 +31,13 @@ export class UserController extends Controller {
     @Request() request: RequestWithUser
   ): Promise<UserResponseDto> {
     return this.userService.getUser(request.user.id);
+  }
+
+  @Post()
+  public async registerUser(
+    @Body() userRegistrationRequestDto: UserRegistrationRequestDto
+  ): Promise<void> {
+    await this.userService.createUser(userRegistrationRequestDto);
+    this.setStatus(StatusCodes.OK);
   }
 }
