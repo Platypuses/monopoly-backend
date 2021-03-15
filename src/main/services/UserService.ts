@@ -67,23 +67,4 @@ export default {
 
     logger.info(`Created user '${user.nickname}' with id '${user.id}'.`);
   },
-
-  async createUser(
-    userRegistrationRequestDto: UserRegistrationRequestDto
-  ): Promise<void> {
-    const nickname = userRegistrationRequestDto.nickname.trim();
-    const password = userRegistrationRequestDto.password.trim();
-
-    await validateUserRegistration(nickname, password);
-
-    let user: User = new User();
-    user.nickname = nickname;
-    user.password = await Bcrypt.hash(password, SALT_ROUNDS);
-    user.accountType = AccountType.PERMANENT_ACCOUNT;
-    user.registrationDate = new Date();
-
-    user = await getRepository(User).save(user);
-
-    logger.info(`Created user '${user.nickname}' with id '${user.id}'.`);
-  },
 };

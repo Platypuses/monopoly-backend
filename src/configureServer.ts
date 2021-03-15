@@ -1,3 +1,5 @@
+/* eslint-disable node/no-unpublished-import */
+
 import bodyParser from 'body-parser';
 import { createConnection } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
