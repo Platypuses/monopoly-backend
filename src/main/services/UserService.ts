@@ -50,7 +50,7 @@ export default {
     };
   },
 
-  async getIsUserExists(nickname: string): Promise<UserNicknameCheckDto> {
+  async isUserExists(nickname: string): Promise<UserNicknameCheckDto> {
     const user = await getRepository(User).findOne({ nickname });
 
     return {

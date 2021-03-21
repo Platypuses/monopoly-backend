@@ -39,7 +39,7 @@ export class UserController extends Controller {
   public async checkUserNickname(
     @Query() nickname: string
   ): Promise<UserNicknameCheckDto> {
-    return this.userService.getIsUserExists(nickname);
+    return this.userService.isUserExists(nickname);
   }
 
   @Post()
