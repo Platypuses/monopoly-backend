@@ -6,10 +6,15 @@ import AccountType from '../models/entities/enums/AccountType';
 import logger from '../config/logger';
 import UserRegistrationRequestDto from '../models/requests/UserRegistrationRequestDto';
 import UserResponseDto from '../models/responses/UserResponseDto';
+import UserAuthorizationRequestDto from '../models/requests/UserAuthorizationRequestDto';
 
 const SALT_ROUNDS = 10;
 
 const USER_DOES_NOT_EXIST = 'Пользователь не существует';
+const USER_WITH_THAT_NICKNAME_DOES_NOT_EXIST =
+  '"Пользователь с таким никнеймом не зарегистрирован.';
+const INCORRECT_PASSWORD = 'Пароль неверный.';
+const NOT_A_PERMANENT_ACCOUNT = 'Вход не в постоянный аккаунт.';
 const FILL_ALL_FIELDS = 'Заполните все требуемые поля!';
 const NICKNAME_LENGTH_WARN = 'Никнейм должен быть длиной от 5 до 15 символов!';
 const PASSWORD_LENGTH_WARN = 'Пароль должен быть длиной от 5 до 30 символов!';
@@ -47,6 +52,32 @@ export default {
       id: user.id,
       nickname: user.nickname,
     };
+  },
+
+  async getUserByNicknameAndPassword(
+    userRequestDto: UserAuthorizationRequestDto
+  ): Promise<User> {
+    const nickname = userRequestDto.nickname.trim();
+    const password = userRequestDto.password.trim();
+
+    if (!nickname || !password) {
+      throw new ClientError(FILL_ALL_FIELDS);
+    }
+
+    const user = await getRepository(User).findOne({ nickname });
+    if (user === undefined) {
+      throw new ClientError(USER_WITH_THAT_NICKNAME_DOES_NOT_EXIST, 401);
+    }
+
+    if (user.accountType !== AccountType.PERMANENT_ACCOUNT) {
+      throw new ClientError(NOT_A_PERMANENT_ACCOUNT);
+    }
+
+    if (!(await Bcrypt.compare(password, user.password))) {
+      throw new ClientError(INCORRECT_PASSWORD, 401);
+    }
+
+    return user;
   },
 
   async createUser(
