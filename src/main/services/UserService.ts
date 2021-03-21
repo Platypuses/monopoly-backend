@@ -12,7 +12,7 @@ const SALT_ROUNDS = 10;
 
 const USER_DOES_NOT_EXIST = 'Пользователь не существует';
 const USER_WITH_THAT_NICKNAME_DOES_NOT_EXIST =
-  '"Пользователь с таким никнеймом не зарегистрирован.';
+  'Пользователь с таким никнеймом не зарегистрирован.';
 const INCORRECT_PASSWORD = 'Пароль неверный.';
 const FILL_ALL_FIELDS = 'Заполните все требуемые поля!';
 const NICKNAME_LENGTH_WARN = 'Никнейм должен быть длиной от 5 до 15 символов!';
@@ -53,7 +53,7 @@ export default {
     };
   },
 
-  async authorizeUser(
+  async getUserByNicknameAndPassword(
     userRequestDto: UserAuthorizationRequestDto
   ): Promise<User> {
     const nickname = userRequestDto.nickname.trim();

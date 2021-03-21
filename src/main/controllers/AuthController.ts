@@ -3,7 +3,7 @@ import RefreshTokensPairRequestDto from '../models/requests/RefreshTokensPairReq
 import UserAuthorizationRequestDto from '../models/requests/UserAuthorizationRequestDto';
 import TokensPairResponseDto from '../models/responses/TokensPairResponseDto';
 import TokenService from '../services/TokenService';
-import UserService from '../services/UserService';
+import AuthService from '../services/AuthService';
 
 @Route('/api/v1/auth')
 @Tags('Auth Controller')
@@ -11,20 +11,19 @@ import UserService from '../services/UserService';
 export class AuthController extends Controller {
   private readonly tokenService;
 
-  private readonly userService;
+  private readonly authService;
 
   constructor() {
     super();
     this.tokenService = TokenService;
-    this.userService = UserService;
+    this.authService = AuthService;
   }
 
   @Post()
   public async authorizeUserByNicknameAndPassword(
     @Body() requestDto: UserAuthorizationRequestDto
   ): Promise<TokensPairResponseDto> {
-    const user = await this.userService.authorizeUser(requestDto);
-    return this.tokenService.generateTokens(user.id);
+    return this.authService.authorizeUser(requestDto);
   }
 
   @Get('/tokens-pair')
