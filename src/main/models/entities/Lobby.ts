@@ -8,9 +8,6 @@ export default class Lobby {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ length: 50 })
-  uuid!: string;
-
   @Column({ type: 'enum', enum: LobbyStatus })
   status!: LobbyStatus;
 
