@@ -14,7 +14,6 @@ const USER_DOES_NOT_EXIST = 'Пользователь не существует'
 const USER_WITH_THAT_NICKNAME_DOES_NOT_EXIST =
   '"Пользователь с таким никнеймом не зарегистрирован.';
 const INCORRECT_PASSWORD = 'Пароль неверный.';
-const NOT_A_PERMANENT_ACCOUNT = 'Вход не в постоянный аккаунт.';
 const FILL_ALL_FIELDS = 'Заполните все требуемые поля!';
 const NICKNAME_LENGTH_WARN = 'Никнейм должен быть длиной от 5 до 15 символов!';
 const PASSWORD_LENGTH_WARN = 'Пароль должен быть длиной от 5 до 30 символов!';
@@ -54,7 +53,7 @@ export default {
     };
   },
 
-  async getUserByNicknameAndPassword(
+  async authorizeUser(
     userRequestDto: UserAuthorizationRequestDto
   ): Promise<User> {
     const nickname = userRequestDto.nickname.trim();
@@ -64,13 +63,13 @@ export default {
       throw new ClientError(FILL_ALL_FIELDS);
     }
 
-    const user = await getRepository(User).findOne({ nickname });
+    const user = await getRepository(User).findOne({
+      nickname,
+      accountType: AccountType.PERMANENT_ACCOUNT,
+    });
+
     if (user === undefined) {
       throw new ClientError(USER_WITH_THAT_NICKNAME_DOES_NOT_EXIST, 401);
-    }
-
-    if (user.accountType !== AccountType.PERMANENT_ACCOUNT) {
-      throw new ClientError(NOT_A_PERMANENT_ACCOUNT);
     }
 
     if (!(await Bcrypt.compare(password, user.password))) {

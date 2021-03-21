@@ -23,21 +23,8 @@ export class AuthController extends Controller {
   public async authorizeUserByNicknameAndPassword(
     @Body() requestDto: UserAuthorizationRequestDto
   ): Promise<TokensPairResponseDto> {
-    const user = await this.userService.getUserByNicknameAndPassword(
-      requestDto
-    );
-
-    let tokensPairDto: TokensPairResponseDto;
-    if (user.refreshTokens) {
-      const refreshToken = user.refreshTokens[0].value;
-      tokensPairDto = await this.tokenService.generateTokensByRefreshToken(
-        refreshToken
-      );
-    } else {
-      tokensPairDto = await this.tokenService.generateTokens(user.id);
-    }
-
-    return tokensPairDto;
+    const user = await this.userService.authorizeUser(requestDto);
+    return this.tokenService.generateTokens(user.id);
   }
 
   @Get('/tokens-pair')
