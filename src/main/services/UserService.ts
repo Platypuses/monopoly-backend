@@ -6,6 +6,7 @@ import AccountType from '../models/entities/enums/AccountType';
 import logger from '../config/logger';
 import UserRegistrationRequestDto from '../models/requests/UserRegistrationRequestDto';
 import UserResponseDto from '../models/responses/UserResponseDto';
+import UserNicknameCheckDto from '../models/responses/UserNicknameCheckDto';
 import UserAuthorizationRequestDto from '../models/requests/UserAuthorizationRequestDto';
 
 const SALT_ROUNDS = 10;
@@ -50,6 +51,14 @@ export default {
     return {
       id: user.id,
       nickname: user.nickname,
+    };
+  },
+
+  async isUserExists(nickname: string): Promise<UserNicknameCheckDto> {
+    const user = await getRepository(User).findOne({ nickname });
+
+    return {
+      taken: user !== undefined,
     };
   },
 

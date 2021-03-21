@@ -7,12 +7,14 @@ import {
   Route,
   Security,
   Tags,
+  Query,
 } from 'tsoa';
 import { StatusCodes } from 'http-status-codes';
 import UserService from '../services/UserService';
 import UserRegistrationRequestDto from '../models/requests/UserRegistrationRequestDto';
 import { RequestWithUser } from '../security/JwtAuthMiddleware';
 import UserResponseDto from '../models/responses/UserResponseDto';
+import UserNicknameCheckDto from '../models/responses/UserNicknameCheckDto';
 
 @Route('/api/v1/users')
 @Tags('User Controller')
@@ -31,6 +33,13 @@ export class UserController extends Controller {
     @Request() request: RequestWithUser
   ): Promise<UserResponseDto> {
     return this.userService.getUser(request.user.id);
+  }
+
+  @Get('/nickname-check')
+  public async checkUserNickname(
+    @Query() nickname: string
+  ): Promise<UserNicknameCheckDto> {
+    return this.userService.isUserExists(nickname);
   }
 
   @Post()
