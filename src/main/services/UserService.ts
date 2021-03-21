@@ -77,6 +77,8 @@ export default {
       throw new ClientError(INCORRECT_PASSWORD, 401);
     }
 
+    logger.info(`Getting user by nickname == ${nickname}`);
+
     return user;
   },
 
