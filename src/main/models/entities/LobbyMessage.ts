@@ -7,6 +7,7 @@ export default class LobbyMessage {
   @ManyToOne(() => User, (user) => user.lobbyMessages, {
     primary: true,
     nullable: false,
+    eager: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })

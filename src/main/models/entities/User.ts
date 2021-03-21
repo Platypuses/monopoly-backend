@@ -51,8 +51,6 @@ export default class User {
   )
   lobbyParticipant!: LobbyParticipant;
 
-  @OneToMany(() => LobbyMessage, (lobbyMessage) => lobbyMessage.user, {
-    eager: true,
-  })
+  @OneToMany(() => LobbyMessage, (lobbyMessage) => lobbyMessage.user)
   lobbyMessages!: LobbyMessage[];
 }
