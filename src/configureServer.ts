@@ -5,6 +5,7 @@ import { createConnection } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import swaggerUi from 'swagger-ui-express';
 import { Express, NextFunction, Request, Response } from 'express';
+import cors from 'cors';
 import { RegisterRoutes } from '../tsoa/routes';
 import {
   POSTGRES_DB_HOST,
@@ -78,6 +79,7 @@ function configureErrorHandler(app: Express) {
 export default async function configureServer(app: Express): Promise<void> {
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
+  app.use(cors());
 
   await configureDatabaseConnection();
   configureSwaggerUI(app);
