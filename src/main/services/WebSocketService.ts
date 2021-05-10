@@ -47,11 +47,15 @@ export default class WebSocketService {
     if (typeof accessToken === 'string') {
       TokenService.parseAccessToken(accessToken)
         .then((tokenPayload: JWTPayload) => {
-          this.clients.set(tokenPayload.userId, ws);
+          this.clients.set(<number>tokenPayload.userId, ws);
           logger.info(
             `Websocket client connected with id ${tokenPayload.userId}.`
           );
-          this.send(tokenPayload.userId, WSMessageType.TEST, new Date());
+          this.send(
+            <number>tokenPayload.userId,
+            WSMessageType.TEST,
+            new Date()
+          );
         })
         .catch((err: ClientError) => {
           ws.close();
