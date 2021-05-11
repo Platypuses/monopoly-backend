@@ -8,7 +8,6 @@ import {
   Delete,
   Path,
 } from 'tsoa';
-// import { StatusCodes } from 'http-status-codes';
 import { StatusCodes } from 'http-status-codes';
 import LobbyService from '../services/LobbyService';
 import LobbyCreationResponseDto from '../models/responses/LobbyCreationResponseDto';

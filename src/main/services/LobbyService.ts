@@ -76,6 +76,7 @@ export default {
 
     await checkThatUserIsLobbyCreator(user.id, lobby.id);
 
+    logger.info(`Delete lobby '${lobby.id}'`);
     await getRepository(Lobby).delete(lobby.id);
   },
 };
