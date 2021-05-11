@@ -1,0 +1,45 @@
+name: Update application on the server
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: ${{ secrets.DOCKER_LOGIN }}/monopoly-backend:latest
+    steps:
+      - name: Login to Docker registry
+        run: echo '${{ secrets.DOCKER_PASSWORD }}' | docker login -u ${{ secrets.DOCKER_LOGIN }} --password-stdin
+
+      - uses: actions/checkout@v2
+
+      - name: Build the Docker image
+        run: docker build -t $IMAGE_NAME .
+
+      - name: Push image to the DockerHub
+        run: docker push $IMAGE_NAME
+
+  deploy:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: ${{ secrets.DOCKER_LOGIN }}/monopoly-backend:latest
+      DOCKER_SERVICE_NAME: ${{ secrets.DOCKER_SERVICE_NAME }}
+    steps:
+      - name: Update running service
+        uses: appleboy/ssh-action@master
+        with:
+          script_stop: true
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          envs: IMAGE_NAME,DOCKER_SERVICE_NAME
+          script: |
+            cd monopoly-environment
+            docker pull $IMAGE_NAME
+            docker-compose up -d $DOCKER_SERVICE_NAME

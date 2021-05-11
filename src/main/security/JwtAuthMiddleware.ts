@@ -19,7 +19,7 @@ export async function expressAuthentication(
   }
 
   const tokenPayload = await TokenService.parseAccessToken(accessToken);
-  return { id: tokenPayload.userId };
+  return { id: <number>tokenPayload.userId };
 }
 
 export interface RequestWithUser {
