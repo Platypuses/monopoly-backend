@@ -43,3 +43,4 @@ jobs:
             cd monopoly-environment
             docker pull $IMAGE_NAME
             docker-compose up -d $DOCKER_SERVICE_NAME
+            docker image prune --all --force
