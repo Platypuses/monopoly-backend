@@ -15,7 +15,6 @@ import {
   POSTGRES_DB_PORT,
   POSTGRES_DB_USERNAME,
   SWAGGER_PATH,
-  WEBSOCKET_PORT,
 } from './main/config/appConfigProperties';
 import User from './main/models/entities/User';
 import UserStatistics from './main/models/entities/UserStatistics';
@@ -87,5 +86,5 @@ export default async function configureServer(app: Express): Promise<void> {
   configureSwaggerUI(app);
   RegisterRoutes(app);
   configureErrorHandler(app);
-  WebSocketService.configureWebsocketServer(WEBSOCKET_PORT);
+  WebSocketService.configureWebsocketServer();
 }
