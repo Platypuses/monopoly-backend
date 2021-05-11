@@ -1,7 +1,8 @@
-import { Controller, Post, Route, Tags } from 'tsoa';
+import { Controller, Post, Request, Route, Security, Tags } from 'tsoa';
 // import { StatusCodes } from 'http-status-codes';
 import LobbyService from '../services/LobbyService';
 import LobbyCreationResponseDto from '../models/responses/LobbyCreationResponseDto';
+import { RequestWithUser } from '../security/JwtAuthMiddleware';
 // import UserRegistrationRequestDto from '../models/requests/UserRegistrationRequestDto';
 // import { RequestWithUser } from '../security/JwtAuthMiddleware';
 // import UserResponseDto from '../models/responses/UserResponseDto';
@@ -19,8 +20,11 @@ export class LobbyController extends Controller {
   }
 
   @Post()
-  public async registerLobby(): // @Body() lobbyRegistrationRequestDto: LobbyRegistrationRequestDto
+  @Security('JWT')
+  public async registerLobby(
+    @Request() request: RequestWithUser
+  ): // @Body() lobbyRegistrationRequestDto: LobbyRegistrationRequestDto
   Promise<LobbyCreationResponseDto> {
-    return this.lobbyService.createLobby();
+    return this.lobbyService.createLobby(request.user.id);
   }
 }
