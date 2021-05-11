@@ -1,12 +1,18 @@
-import { Controller, Post, Request, Route, Security, Tags } from 'tsoa';
+import {
+  Controller,
+  Post,
+  Request,
+  Route,
+  Security,
+  Tags,
+  Delete,
+  Path,
+} from 'tsoa';
 // import { StatusCodes } from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
 import LobbyService from '../services/LobbyService';
 import LobbyCreationResponseDto from '../models/responses/LobbyCreationResponseDto';
 import { RequestWithUser } from '../security/JwtAuthMiddleware';
-// import UserRegistrationRequestDto from '../models/requests/UserRegistrationRequestDto';
-// import { RequestWithUser } from '../security/JwtAuthMiddleware';
-// import UserResponseDto from '../models/responses/UserResponseDto';
-// import UserNicknameCheckDto from '../models/responses/UserNicknameCheckDto';
 
 @Route('/api/v1/lobbies')
 @Tags('Lobby Controller')
@@ -23,8 +29,17 @@ export class LobbyController extends Controller {
   @Security('JWT')
   public async registerLobby(
     @Request() request: RequestWithUser
-  ): // @Body() lobbyRegistrationRequestDto: LobbyRegistrationRequestDto
-  Promise<LobbyCreationResponseDto> {
+  ): Promise<LobbyCreationResponseDto> {
     return this.lobbyService.createLobby(request.user.id);
+  }
+
+  @Delete('{lobbyId}')
+  @Security('JWT')
+  public async dissolveLobby(
+    @Path() lobbyId: number,
+    @Request() request: RequestWithUser
+  ): Promise<void> {
+    await this.lobbyService.deleteLobby(lobbyId, request.user.id);
+    this.setStatus(StatusCodes.OK);
   }
 }

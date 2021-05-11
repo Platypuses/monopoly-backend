@@ -8,9 +8,10 @@ import LobbyCreationResponseDto from '../models/responses/LobbyCreationResponseD
 import ClientError from '../models/error/ClientError';
 
 const USER_DOES_NOT_EXIST = 'Пользователь не существует';
-// const LOBBY_DOES_NOT_EXIST = 'Лобби не существует';
+const LOBBY_DOES_NOT_EXIST = 'Лобби не существует';
 const USER_IS_IN_LOBBY = 'Вы уже являетесь участником лобби';
-// const NOT_AN_OWNER = 'Пользователь не является владельцем лобби';
+const NOT_AN_OWNER = 'Вы не являетесь создателем лобби';
+const LOBBY_CREATOR_DOES_NOT_EXIST = 'Создать лобби не определён';
 
 async function checkThatUserNotLobbyParticipant(user: User) {
   const lobbyParticipant = await getRepository(LobbyParticipant).findOne({
@@ -18,6 +19,19 @@ async function checkThatUserNotLobbyParticipant(user: User) {
   });
   if (lobbyParticipant !== undefined) {
     throw new ClientError(USER_IS_IN_LOBBY);
+  }
+}
+
+async function checkThatUserIsLobbyCreator(userId: number, lobbyId: number) {
+  const lobbyParticipants = await getRepository(LobbyParticipant).find({
+    lobby: { id: lobbyId },
+  });
+  const lobbyCreator = lobbyParticipants.find((element) => element.isCreator);
+  if (lobbyCreator === undefined) {
+    throw new ClientError(LOBBY_CREATOR_DOES_NOT_EXIST);
+  }
+  if (userId !== lobbyCreator.user.id) {
+    throw new ClientError(NOT_AN_OWNER);
   }
 }
 
@@ -47,5 +61,21 @@ export default {
     return {
       lobbyId: lobby.id,
     };
+  },
+
+  async deleteLobby(lobbyId: number, userId: number): Promise<void> {
+    const user = await getRepository(User).findOne(userId);
+    if (user === undefined) {
+      throw new ClientError(USER_DOES_NOT_EXIST);
+    }
+
+    const lobby = await getRepository(Lobby).findOne(lobbyId);
+    if (lobby === undefined) {
+      throw new ClientError(LOBBY_DOES_NOT_EXIST);
+    }
+
+    await checkThatUserIsLobbyCreator(user.id, lobby.id);
+
+    await getRepository(Lobby).delete(lobby.id);
   },
 };
