@@ -1,85 +1,69 @@
 import WebSocket, { CloseEvent, MessageEvent } from 'ws';
-import { StatusCodes } from 'http-status-codes';
-import { JWTPayload } from 'jose/jwt/sign';
 import TokenService from './TokenService';
-import ClientError from '../models/error/ClientError';
-import WSMessageType from '../models/entities/enums/WSMessageType';
 import logger from '../config/logger';
+import WSMessageType from '../models/entities/enums/WSMessageType';
+import ClientError from '../models/error/ClientError';
 
 const WS_CONNECTION = 'connection';
-const ACCESS_TOKEN_QUERY_NAME = 'accessToken';
-const BASE_URL = 'ws://localhost:8000';
+const WS_MESSAGE = 'message';
+const WS_CLOSE = 'close';
 
+const BASE_URL = 'ws://base.url';
+const INVALID_FRAME_STATUS_CODE = 1007;
+
+const ACCESS_TOKEN_QUERY_NAME = 'accessToken';
 const MISS_QUERY_PARAM = `Отсутствует параметр запроса ${ACCESS_TOKEN_QUERY_NAME}`;
 
-export default class WebSocketService {
-  private wss: WebSocket.Server;
+let wsClients: Map<number, WebSocket>;
+let wsServer: WebSocket.Server;
 
-  private clients: Map<number, WebSocket>;
+async function verifyClient(ws: WebSocket, wsUrl: string) {
+  const url: URL = new URL(wsUrl, BASE_URL);
 
-  constructor() {
-    this.wss = new WebSocket.Server({ port: 8000 });
-    this.clients = new Map<number, WebSocket>();
-    this.configureWebSocket();
+  if (!url.searchParams.has(ACCESS_TOKEN_QUERY_NAME)) {
+    ws.close(INVALID_FRAME_STATUS_CODE, MISS_QUERY_PARAM);
   }
 
-  private configureWebSocket() {
-    this.wss.on(WS_CONNECTION, (ws: WebSocket, request: Request) => {
-      this.verifyClient(ws, request.url);
+  const accessToken = url.searchParams.get(ACCESS_TOKEN_QUERY_NAME);
+  if (accessToken == null) {
+    return;
+  }
 
-      // eslint-disable-next-line no-param-reassign
-      ws.onmessage = WebSocketService.onmessage;
+  try {
+    const tokenPayload = await TokenService.parseAccessToken(accessToken);
+    wsClients.set(tokenPayload.userId, ws);
+    logger.info(`Websocket client connected with id ${tokenPayload.userId}.`);
+  } catch (err) {
+    ws.close(INVALID_FRAME_STATUS_CODE, err.message);
+  }
+}
 
-      // eslint-disable-next-line no-param-reassign
-      ws.onclose = WebSocketService.onclose;
+function onMessage(messageEvent: MessageEvent): void {
+  logger.info(`Received data is ${JSON.stringify(messageEvent)}`);
+}
+
+function onClose(code: CloseEvent): void {
+  logger.info(`Connection closed cleanly, code ${code}.`);
+}
+
+export default {
+  configureWebsocketServer(port: number): void {
+    wsClients = new Map<number, WebSocket>();
+    wsServer = new WebSocket.Server({ port });
+
+    wsServer.on(WS_CONNECTION, async (ws: WebSocket, request: Request) => {
+      await verifyClient(ws, request.url);
+      ws.on(WS_MESSAGE, onMessage);
+      ws.on(WS_CLOSE, onClose);
     });
-  }
+  },
 
-  private verifyClient(ws: WebSocket, wsUrl: string) {
-    const url: URL = new URL(wsUrl, BASE_URL);
-
-    if (!url.searchParams.has(ACCESS_TOKEN_QUERY_NAME)) {
-      ws.close();
-      throw new ClientError(MISS_QUERY_PARAM, StatusCodes.BAD_REQUEST);
-    }
-
-    const accessToken = url.searchParams.get(ACCESS_TOKEN_QUERY_NAME);
-    if (typeof accessToken === 'string') {
-      TokenService.parseAccessToken(accessToken)
-        .then((tokenPayload: JWTPayload) => {
-          this.clients.set(tokenPayload.userId, ws);
-          logger.info(
-            `Websocket client connected with id ${tokenPayload.userId}.`
-          );
-          this.send(tokenPayload.userId, WSMessageType.TEST, new Date());
-        })
-        .catch((err: ClientError) => {
-          ws.close();
-          throw new ClientError(err.message, err.status);
-        });
-    }
-  }
-
-  public send(userId: number, type: WSMessageType, payload: unknown): void {
-    const ws = this.clients.get(userId);
+  send(userId: number, type: WSMessageType, payload: unknown): void {
+    const ws = wsClients.get(userId);
     if (ws === undefined) {
       throw new ClientError(`Client with such id ${userId} does not exist`);
     }
 
     ws.send(JSON.stringify({ type, payload }));
-  }
-
-  private static onmessage(event: MessageEvent): void {
-    logger.info(`Received data is ${event.data}`);
-  }
-
-  private static onclose(event: CloseEvent): void {
-    if (event.wasClean) {
-      logger.info(
-        `Connection closed cleanly, code ${event.code}, reason ${event.reason}.`
-      );
-    } else {
-      logger.warn('Connection died');
-    }
-  }
-}
+  },
+};

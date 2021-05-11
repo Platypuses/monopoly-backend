@@ -40,3 +40,8 @@ export const REFRESH_TOKEN_LIFETIME =
 
 export const ACCESS_TOKEN_HEADER =
   process.env.ACCESS_TOKEN_HEADER || 'Authorization';
+
+export const WEBSOCKET_PORT = parseInt(
+  process.env.WEBSOCKET_PORT || '8000',
+  10
+);
