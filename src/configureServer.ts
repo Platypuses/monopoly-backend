@@ -6,6 +6,7 @@ import swaggerUi from 'swagger-ui-express';
 import express, { Express, NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import { RegisterRoutes } from '../tsoa/routes';
+import WebSocketService from './main/services/WebSocketService';
 import {
   POSTGRES_DB_HOST,
   POSTGRES_DB_NAME,
@@ -84,4 +85,5 @@ export default async function configureServer(app: Express): Promise<void> {
   configureSwaggerUI(app);
   RegisterRoutes(app);
   configureErrorHandler(app);
+  WebSocketService.configureWebsocketServer();
 }
