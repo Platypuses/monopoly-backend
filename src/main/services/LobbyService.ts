@@ -1,14 +1,13 @@
 import { getRepository } from 'typeorm';
 import Lobby from '../models/entities/Lobby';
-import User from '../models/entities/User';
+// import User from '../models/entities/User';
 import LobbyParticipant from '../models/entities/LobbyParticipant';
 import LobbyStatus from '../models/entities/enums/LobbyStatus';
 import logger from '../config/logger';
 import LobbyCreationResponseDto from '../models/responses/LobbyCreationResponseDto';
 import ClientError from '../models/error/ClientError';
-// import UserService from '../services/UserService'
+import UserService from '../services/UserService';
 
-const USER_DOES_NOT_EXIST = 'Пользователь не существует';
 const LOBBY_DOES_NOT_EXIST = 'Лобби не существует';
 const USER_IS_IN_LOBBY = 'Вы уже являетесь участником лобби';
 const NOT_AN_OWNER = 'Вы не являетесь создателем лобби';
@@ -47,12 +46,17 @@ async function checkThatUserIsLobbyCreator(userId: number, lobbyId: number) {
   }
 }
 
+async function checkLobbyExistsById(lobbyId: number): Promise<Lobby> {
+  const lobby = await getRepository(Lobby).findOne(lobbyId);
+  if (lobby === undefined) {
+    throw new ClientError(LOBBY_DOES_NOT_EXIST);
+  }
+  return lobby;
+}
+
 export default {
   async createLobby(userId: number): Promise<LobbyCreationResponseDto> {
-    const user = await getRepository(User).findOne(userId);
-    if (user === undefined) {
-      throw new ClientError(USER_DOES_NOT_EXIST);
-    }
+    const user = await UserService.checkUserExistsById(userId);
     await checkThatUserNotLobbyParticipant(userId);
 
     let lobby = new Lobby();
@@ -76,16 +80,8 @@ export default {
   },
 
   async deleteLobby(lobbyId: number, userId: number): Promise<void> {
-    const user = await getRepository(User).findOne(userId);
-    if (user === undefined) {
-      throw new ClientError(USER_DOES_NOT_EXIST);
-    }
-
-    const lobby = await getRepository(Lobby).findOne(lobbyId);
-    if (lobby === undefined) {
-      throw new ClientError(LOBBY_DOES_NOT_EXIST);
-    }
-
+    const user = await UserService.checkUserExistsById(userId);
+    const lobby = await checkLobbyExistsById(lobbyId);
     await checkThatUserIsLobbyCreator(user.id, lobby.id);
 
     logger.info(`Delete lobby '${lobby.id}'`);
