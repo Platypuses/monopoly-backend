@@ -6,6 +6,7 @@ import LobbyStatus from '../models/entities/enums/LobbyStatus';
 import logger from '../config/logger';
 import LobbyCreationResponseDto from '../models/responses/LobbyCreationResponseDto';
 import ClientError from '../models/error/ClientError';
+// import UserService from '../services/UserService'
 
 const USER_DOES_NOT_EXIST = 'Пользователь не существует';
 const LOBBY_DOES_NOT_EXIST = 'Лобби не существует';
@@ -13,15 +14,15 @@ const USER_IS_IN_LOBBY = 'Вы уже являетесь участником л
 const NOT_AN_OWNER = 'Вы не являетесь создателем лобби';
 const LOBBY_CREATOR_DOES_NOT_EXIST = 'Создать лобби не определён';
 
-async function isLobbyParticipant(user: User): Promise<boolean> {
+async function isLobbyParticipant(userId: number): Promise<boolean> {
   const lobbyParticipant = await getRepository(LobbyParticipant).findOne({
-    user,
+    user: { id: userId },
   });
   return lobbyParticipant !== undefined;
 }
 
-async function checkThatUserNotLobbyParticipant(user: User) {
-  if (await isLobbyParticipant(user)) {
+async function checkThatUserNotLobbyParticipant(userId: number) {
+  if (await isLobbyParticipant(userId)) {
     throw new ClientError(USER_IS_IN_LOBBY);
   }
 }
@@ -52,7 +53,7 @@ export default {
     if (user === undefined) {
       throw new ClientError(USER_DOES_NOT_EXIST);
     }
-    await checkThatUserNotLobbyParticipant(user);
+    await checkThatUserNotLobbyParticipant(userId);
 
     let lobby = new Lobby();
     lobby.status = LobbyStatus.WAITING_FOR_PLAYERS;

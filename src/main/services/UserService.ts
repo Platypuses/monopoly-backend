@@ -62,6 +62,11 @@ export default {
     };
   },
 
+  async isUserExistsById(userId: string): Promise<boolean> {
+    const user = await getRepository(User).findOne(userId);
+    return user !== undefined;
+  },
+
   async getUserByNicknameAndPassword(
     userRequestDto: UserAuthorizationRequestDto
   ): Promise<User> {
