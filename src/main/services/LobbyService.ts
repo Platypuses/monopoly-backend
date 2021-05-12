@@ -13,24 +13,35 @@ const USER_IS_IN_LOBBY = 'Вы уже являетесь участником л
 const NOT_AN_OWNER = 'Вы не являетесь создателем лобби';
 const LOBBY_CREATOR_DOES_NOT_EXIST = 'Создать лобби не определён';
 
-async function checkThatUserNotLobbyParticipant(user: User) {
+async function isLobbyParticipant(user: User): Promise<boolean> {
   const lobbyParticipant = await getRepository(LobbyParticipant).findOne({
     user,
   });
-  if (lobbyParticipant !== undefined) {
+  return lobbyParticipant !== undefined;
+}
+
+async function checkThatUserNotLobbyParticipant(user: User) {
+  if (await isLobbyParticipant(user)) {
     throw new ClientError(USER_IS_IN_LOBBY);
   }
 }
 
-async function checkThatUserIsLobbyCreator(userId: number, lobbyId: number) {
-  const lobbyParticipants = await getRepository(LobbyParticipant).find({
+async function isLobbyCreator(
+  userId: number,
+  lobbyId: number
+): Promise<boolean> {
+  const lobbyCreator = await getRepository(LobbyParticipant).findOne({
     lobby: { id: lobbyId },
+    isCreator: true,
   });
-  const lobbyCreator = lobbyParticipants.find((element) => element.isCreator);
   if (lobbyCreator === undefined) {
     throw new ClientError(LOBBY_CREATOR_DOES_NOT_EXIST);
   }
-  if (userId !== lobbyCreator.user.id) {
+  return userId === lobbyCreator.user.id;
+}
+
+async function checkThatUserIsLobbyCreator(userId: number, lobbyId: number) {
+  if (!(await isLobbyCreator(userId, lobbyId))) {
     throw new ClientError(NOT_AN_OWNER);
   }
 }
@@ -43,12 +54,12 @@ export default {
     }
     await checkThatUserNotLobbyParticipant(user);
 
-    let lobby: Lobby = new Lobby();
+    let lobby = new Lobby();
     lobby.status = LobbyStatus.WAITING_FOR_PLAYERS;
     lobby = await getRepository(Lobby).save(lobby);
     logger.info(`Created lobby with id '${lobby.id}'.`);
 
-    let lobbyCreator: LobbyParticipant = new LobbyParticipant();
+    let lobbyCreator = new LobbyParticipant();
     lobbyCreator.user = user;
     lobbyCreator.isCreator = true;
     lobbyCreator.isReady = true;
