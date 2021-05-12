@@ -2,16 +2,17 @@ import { getRepository } from 'typeorm';
 import LobbyParticipant from '../models/entities/LobbyParticipant';
 import Lobby from '../models/entities/Lobby';
 import ClientError from '../models/error/ClientError';
+import logger from '../config/logger';
 
 const MAX_PLAYERS_NUMBER = 6;
 
-const USER_IS_A_LOBBY_MEMBER = 'Пользователь уже находится в лобби.';
-const USER_IS_NOT_A_LOBBY_MEMBER = 'Пользователь не состоит ни в одном лобби.';
-const LOBBY_DOES_NOT_EXIST = 'Лобби не существует.';
-const LOBBY_REFUSED_PLAYER = 'Лобби не принимает новых игроков.';
+const USER_IS_A_LOBBY_MEMBER = 'User is a lobby member';
+const USER_IS_NOT_A_LOBBY_MEMBER = 'User is not a lobby member';
+const LOBBY_DOES_NOT_EXIST = 'Lobby does not exist';
+const LOBBY_REFUSED_PLAYER = 'Lobby refused connection';
 
 async function isLobbyParticipant(userId: number): Promise<boolean> {
-  const lobbyParticipant = await getRepository(LobbyParticipant).find({
+  const lobbyParticipant = await getRepository(LobbyParticipant).findOne({
     user: { id: userId },
   });
   return lobbyParticipant !== undefined;
@@ -24,17 +25,19 @@ export default {
     if (lobby.lobbyParticipants.length >= MAX_PLAYERS_NUMBER) {
       throw new ClientError(LOBBY_REFUSED_PLAYER);
     }
-
-    if (await isLobbyParticipant(userId)) {
+    const lobbyMember = await isLobbyParticipant(userId);
+    if (lobbyMember) {
       throw new ClientError(USER_IS_A_LOBBY_MEMBER);
     }
 
-    const lobbyParticipant = new LobbyParticipant();
-    lobbyParticipant.user.id = userId;
-    lobbyParticipant.lobby.id = lobbyId;
-    lobbyParticipant.isCreator = false;
-    lobbyParticipant.isReady = false;
-    await getRepository(LobbyParticipant).save(lobbyParticipant);
+    await getRepository(LobbyParticipant).save({
+      user: { id: userId },
+      lobby: { id: lobbyId },
+      isCreator: false,
+      isReady: false,
+    });
+
+    logger.info(`User '${userId}' joined lobby '${lobbyId}'`);
   },
 
   async getLobby(lobbyId: number): Promise<Lobby> {
@@ -51,11 +54,12 @@ export default {
     const lobbyParticipant = await getRepository(LobbyParticipant).findOne({
       user: { id: userId },
     });
-
-    if (!lobbyParticipant) {
+    if (lobbyParticipant === undefined) {
       throw new ClientError(USER_IS_NOT_A_LOBBY_MEMBER);
     }
 
-    await getRepository(LobbyParticipant).delete({ user: { id: userId } });
+    await getRepository(LobbyParticipant).delete(lobbyParticipant);
+
+    await logger.info(`User '${userId}' left lobby`);
   },
 };
