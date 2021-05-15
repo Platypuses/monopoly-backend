@@ -9,7 +9,6 @@ import ClientError from '../models/error/ClientError';
 import LobbyResponseDto from '../models/responses/LobbyResponseDto';
 import UserService from '../services/UserService';
 
-const USER_DOES_NOT_EXIST = 'Пользователь не существует';
 const LOBBY_DOES_NOT_EXIST = 'Лобби не существует';
 const USER_IS_IN_LOBBY = 'Вы уже являетесь участником лобби';
 const NOT_AN_OWNER = 'Вы не являетесь создателем лобби';
@@ -105,33 +104,30 @@ export default {
     lobbyId: number,
     userId: number
   ): Promise<LobbyResponseDto> {
-    const user = await getRepository(User).findOne(userId);
-    if (user === undefined) {
-      throw new ClientError(USER_DOES_NOT_EXIST);
-    }
-
-    const lobby = await getRepository(Lobby).findOne(lobbyId);
-    if (lobby === undefined) {
-      throw new ClientError(LOBBY_DOES_NOT_EXIST, 404);
-    }
+    const user = await UserService.getUserByIdIfExists(userId);
+    const lobby = await getLobbyByIdIfExists(lobbyId);
 
     await checkThatUserParticipatesInLobby(user, lobby);
+
+    const lobbyParticipants = lobby.lobbyParticipants.map((participant) => ({
+      id: participant.user.id,
+      nickname: participant.user.nickname,
+      isCreator: participant.isCreator,
+      isReady: participant.isReady,
+    }));
+
+    const lobbyMessages = lobby.lobbyMessages.map((message) => ({
+      senderId: message.user.id,
+      senderNickname: message.user.nickname,
+      messageText: message.messageText,
+      messageDate: message.messageDate,
+    }));
 
     return {
       id: lobbyId,
       status: lobby.status,
-      lobbyParticipants: lobby.lobbyParticipants.map((participant) => ({
-        id: participant.user.id,
-        nickname: participant.user.nickname,
-        isCreator: participant.isCreator,
-        isReady: participant.isReady,
-      })),
-      lobbyMessages: lobby.lobbyMessages.map((message) => ({
-        senderId: message.user.id,
-        senderNickname: message.user.nickname,
-        messageText: message.messageText,
-        messageDate: message.messageDate,
-      })),
+      lobbyParticipants,
+      lobbyMessages,
     };
   },
 };
