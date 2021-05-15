@@ -9,12 +9,12 @@ import UserService from '../services/UserService';
 
 const MAX_PLAYERS_NUMBER = 6;
 
-const LOBBY_DOES_NOT_EXIST = 'Lobby does not exist';
-const LOBBY_REFUSED_PLAYER = 'Lobby refused connection';
+const LOBBY_DOES_NOT_EXIST = 'Лобби не существует';
+const LOBBY_REFUSED_PLAYER = 'Лобби отклонило соединение';
 const LOBBY_CREATOR_DOES_NOT_EXIST = 'Создать лобби не определён';
 
-const USER_IS_A_LOBBY_MEMBER = 'User is a lobby member';
-const USER_IS_NOT_A_LOBBY_MEMBER = 'User is not a lobby member';
+const USER_IS_A_LOBBY_MEMBER = 'Пользователь является участником лобби';
+const USER_IS_NOT_A_LOBBY_MEMBER = 'Пользователь не является участником лобби';
 const NOT_AN_OWNER = 'Вы не являетесь создателем лобби';
 
 async function isLobbyParticipant(userId: number): Promise<boolean> {
@@ -25,7 +25,7 @@ async function isLobbyParticipant(userId: number): Promise<boolean> {
   return lobbyParticipant !== undefined;
 }
 
-async function getLobby(lobbyId: number): Promise<Lobby> {
+async function getLobbyByIdIfExists(lobbyId: number): Promise<Lobby> {
   const lobby = await getRepository(Lobby).findOne(lobbyId);
 
   if (!lobby) {
@@ -89,7 +89,7 @@ export default {
 
   async deleteLobby(lobbyId: number, userId: number): Promise<void> {
     const user = await UserService.getUserByIdIfExists(userId);
-    const lobby = await getLobby(lobbyId);
+    const lobby = await getLobbyByIdIfExists(lobbyId);
     await checkThatUserIsLobbyCreator(user.id, lobby.id);
 
     logger.info(`Delete lobby '${lobby.id}'`);
@@ -97,7 +97,7 @@ export default {
   },
 
   async createLobbyParticipant(lobbyId: number, userId: number): Promise<void> {
-    const lobby = await getLobby(lobbyId);
+    const lobby = await getLobbyByIdIfExists(lobbyId);
 
     if (await isLobbyParticipant(userId)) {
       throw new ClientError(USER_IS_A_LOBBY_MEMBER);

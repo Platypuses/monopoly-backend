@@ -12,7 +12,6 @@ import { StatusCodes } from 'http-status-codes';
 import LobbyService from '../services/LobbyService';
 import LobbyCreationResponseDto from '../models/responses/LobbyCreationResponseDto';
 import { RequestWithUser } from '../security/JwtAuthMiddleware';
-import logger from '../config/logger';
 
 @Route('/api/v1/lobbies')
 @Tags('Lobby Controller')
@@ -46,7 +45,6 @@ export class LobbyController extends Controller {
   @Delete('/lobby-participant')
   @Security('JWT')
   public async leaveLobby(@Request() request: RequestWithUser): Promise<void> {
-    logger.info(request.user.id);
     await this.lobbyService.deleteLobbyParticipant(request.user.id);
     this.setStatus(StatusCodes.OK);
   }
