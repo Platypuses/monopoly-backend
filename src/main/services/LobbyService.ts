@@ -16,8 +16,6 @@ const LOBBY_REFUSED_PLAYER = 'Лобби отклонило соединение
 const USER_IS_A_LOBBY_MEMBER = 'Пользователь является участником лобби';
 const USER_IS_NOT_A_LOBBY_MEMBER = 'Пользователь не является участником лобби';
 
-/* const NOT_AN_OWNER = 'Вы не являетесь создателем лобби'; */
-
 async function checkThatUserParticipatesInLobby(user: User, lobby: Lobby) {
   const lobbyParticipant = await getRepository(LobbyParticipant).findOne({
     user,
