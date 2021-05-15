@@ -1,6 +1,5 @@
 import { getRepository } from 'typeorm';
 import Lobby from '../models/entities/Lobby';
-// import User from '../models/entities/User';
 import LobbyParticipant from '../models/entities/LobbyParticipant';
 import LobbyStatus from '../models/entities/enums/LobbyStatus';
 import logger from '../config/logger';
@@ -20,7 +19,7 @@ async function isLobbyParticipant(userId: number): Promise<boolean> {
   return lobbyParticipant !== undefined;
 }
 
-async function checkThatUserNotLobbyParticipant(userId: number) {
+async function checkThatUserIsNotLobbyParticipant(userId: number) {
   if (await isLobbyParticipant(userId)) {
     throw new ClientError(USER_IS_IN_LOBBY);
   }
@@ -46,7 +45,7 @@ async function checkThatUserIsLobbyCreator(userId: number, lobbyId: number) {
   }
 }
 
-async function checkLobbyExistsById(lobbyId: number): Promise<Lobby> {
+async function getLobbyExistsById(lobbyId: number): Promise<Lobby> {
   const lobby = await getRepository(Lobby).findOne(lobbyId);
   if (lobby === undefined) {
     throw new ClientError(LOBBY_DOES_NOT_EXIST);
@@ -56,8 +55,8 @@ async function checkLobbyExistsById(lobbyId: number): Promise<Lobby> {
 
 export default {
   async createLobby(userId: number): Promise<LobbyCreationResponseDto> {
-    const user = await UserService.checkUserExistsById(userId);
-    await checkThatUserNotLobbyParticipant(userId);
+    const user = await UserService.getUserExistsById(userId);
+    await checkThatUserIsNotLobbyParticipant(userId);
 
     let lobby = new Lobby();
     lobby.status = LobbyStatus.WAITING_FOR_PLAYERS;
@@ -80,8 +79,8 @@ export default {
   },
 
   async deleteLobby(lobbyId: number, userId: number): Promise<void> {
-    const user = await UserService.checkUserExistsById(userId);
-    const lobby = await checkLobbyExistsById(lobbyId);
+    const user = await UserService.getUserExistsById(userId);
+    const lobby = await getLobbyExistsById(lobbyId);
     await checkThatUserIsLobbyCreator(user.id, lobby.id);
 
     logger.info(`Delete lobby '${lobby.id}'`);
