@@ -45,7 +45,7 @@ async function checkThatUserIsLobbyCreator(userId: number, lobbyId: number) {
   }
 }
 
-async function getLobbyExistsById(lobbyId: number): Promise<Lobby> {
+async function getLobbyByIdIfExists(lobbyId: number): Promise<Lobby> {
   const lobby = await getRepository(Lobby).findOne(lobbyId);
   if (lobby === undefined) {
     throw new ClientError(LOBBY_DOES_NOT_EXIST);
@@ -55,7 +55,7 @@ async function getLobbyExistsById(lobbyId: number): Promise<Lobby> {
 
 export default {
   async createLobby(userId: number): Promise<LobbyCreationResponseDto> {
-    const user = await UserService.getUserExistsById(userId);
+    const user = await UserService.getUserByIdIfExists(userId);
     await checkThatUserIsNotLobbyParticipant(userId);
 
     let lobby = new Lobby();
@@ -79,8 +79,8 @@ export default {
   },
 
   async deleteLobby(lobbyId: number, userId: number): Promise<void> {
-    const user = await UserService.getUserExistsById(userId);
-    const lobby = await getLobbyExistsById(lobbyId);
+    const user = await UserService.getUserByIdIfExists(userId);
+    const lobby = await getLobbyByIdIfExists(lobbyId);
     await checkThatUserIsLobbyCreator(user.id, lobby.id);
 
     logger.info(`Delete lobby '${lobby.id}'`);

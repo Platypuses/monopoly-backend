@@ -39,7 +39,7 @@ async function validateUserRegistration(nickname: string, password: string) {
 }
 
 export default {
-  async getUserExistsById(userId: number): Promise<User> {
+  async getUserByIdIfExists(userId: number): Promise<User> {
     const user = await getRepository(User).findOne(userId);
     if (user === undefined) {
       throw new ClientError(USER_DOES_NOT_EXIST);
@@ -48,7 +48,7 @@ export default {
   },
 
   async getUser(userId: number): Promise<UserResponseDto> {
-    const user = await this.getUserExistsById(userId);
+    const user = await this.getUserByIdIfExists(userId);
 
     logger.info(`Getting user information by id == ${userId}`);
 
