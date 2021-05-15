@@ -19,7 +19,7 @@ import LobbyResponseDto from '../models/responses/LobbyResponseDto';
 @Tags('Lobby Controller')
 // eslint-disable-next-line import/prefer-default-export
 export class LobbyController extends Controller {
-  private readonly lobbyService;
+  private readonly lobbyService: typeof LobbyService;
 
   constructor() {
     super();

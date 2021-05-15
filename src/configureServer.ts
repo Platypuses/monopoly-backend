@@ -24,6 +24,7 @@ import LobbyParticipant from './main/models/entities/LobbyParticipant';
 import LobbyMessage from './main/models/entities/LobbyMessage';
 import ErrorResponseDto from './main/models/responses/ErrorResponseDto';
 import ErrorHandler from './main/models/error/ErrorHandler';
+import Game from './main/models/entities/Game';
 
 async function configureDatabaseConnection() {
   const connection = await createConnection({
@@ -41,6 +42,7 @@ async function configureDatabaseConnection() {
       Lobby,
       LobbyParticipant,
       LobbyMessage,
+      Game,
     ],
     migrations: ['**/migrations/*.js'],
     logging: ['schema', 'info', 'error'],

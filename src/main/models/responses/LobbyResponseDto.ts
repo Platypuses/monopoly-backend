@@ -1,4 +1,4 @@
-import LobbyStatus from '../entities/enums/LobbyStatus';
+import LobbyStatus from '../enums/LobbyStatus';
 import LobbyParticipantDto from './LobbyParticipantDto';
 import LobbyMessageDto from './LobbyMessageDto';
 

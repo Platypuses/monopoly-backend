@@ -10,7 +10,7 @@ import Avatar from './Avatar';
 import RefreshToken from './RefreshToken';
 import LobbyParticipant from './LobbyParticipant';
 import LobbyMessage from './LobbyMessage';
-import AccountType from './enums/AccountType';
+import AccountType from '../enums/AccountType';
 
 @Entity('users')
 export default class User {

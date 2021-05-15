@@ -1,0 +1,35 @@
+import GameStateDto from '../../../models/responses/game/state/GameStateDto';
+import RollDicesEventPayload from '../../../models/responses/game/events/RollDicesEventPayload';
+import WebSocketPayloadDto from '../../../models/responses/WebSocketPayload';
+import GameEventEnum from '../../../models/enums/GameEventEnum';
+import WebSocketService from '../../WebSocketService';
+
+const MIN_DICE_NUMBER = 1;
+const MAX_DICE_NUMBER = 6;
+const MAX_MINUS_MIN = MAX_DICE_NUMBER - MIN_DICE_NUMBER;
+
+function generateDiceNumber() {
+  return Math.floor(Math.random() * (MAX_MINUS_MIN + 1)) + MIN_DICE_NUMBER;
+}
+
+export default {
+  async handleEvent(gameState: GameStateDto): Promise<void> {
+    const firstDiceNumber = generateDiceNumber();
+    const secondDiceNumber = generateDiceNumber();
+
+    const eventPayload: RollDicesEventPayload = {
+      playerId: gameState.currentMovePlayerId,
+      firstDiceNumber,
+      secondDiceNumber,
+    };
+
+    const webSocketPayload: WebSocketPayloadDto<RollDicesEventPayload> = {
+      event: GameEventEnum.ROLL_DICES,
+      payload: eventPayload,
+    };
+
+    gameState.players.forEach((player) =>
+      WebSocketService.send(player.playerId, webSocketPayload)
+    );
+  },
+};

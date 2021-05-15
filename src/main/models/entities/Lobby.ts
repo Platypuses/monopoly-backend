@@ -1,7 +1,14 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import LobbyStatus from './enums/LobbyStatus';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import LobbyStatus from '../enums/LobbyStatus';
 import LobbyParticipant from './LobbyParticipant';
 import LobbyMessage from './LobbyMessage';
+import Game from './Game';
 
 @Entity('lobbies')
 export default class Lobby {
@@ -22,4 +29,7 @@ export default class Lobby {
     eager: true,
   })
   lobbyMessages!: LobbyMessage[];
+
+  @OneToOne(() => Game, (game) => game.lobby, { cascade: true })
+  game!: Game;
 }

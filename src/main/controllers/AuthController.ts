@@ -9,9 +9,9 @@ import AuthService from '../services/AuthService';
 @Tags('Auth Controller')
 // eslint-disable-next-line import/prefer-default-export
 export class AuthController extends Controller {
-  private readonly tokenService;
+  private readonly tokenService: typeof TokenService;
 
-  private readonly authService;
+  private readonly authService: typeof AuthService;
 
   constructor() {
     super();

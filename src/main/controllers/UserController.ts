@@ -20,7 +20,7 @@ import UserNicknameCheckDto from '../models/responses/UserNicknameCheckDto';
 @Tags('User Controller')
 // eslint-disable-next-line import/prefer-default-export
 export class UserController extends Controller {
-  private readonly userService;
+  private readonly userService: typeof UserService;
 
   constructor() {
     super();

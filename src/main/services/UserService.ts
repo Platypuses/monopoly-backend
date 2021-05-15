@@ -2,7 +2,7 @@ import { getRepository } from 'typeorm';
 import Bcrypt from 'bcrypt';
 import User from '../models/entities/User';
 import ClientError from '../models/error/ClientError';
-import AccountType from '../models/entities/enums/AccountType';
+import AccountType from '../models/enums/AccountType';
 import logger from '../config/logger';
 import UserRegistrationRequestDto from '../models/requests/UserRegistrationRequestDto';
 import UserResponseDto from '../models/responses/UserResponseDto';

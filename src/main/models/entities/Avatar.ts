@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import User from './User';
-import AvatarMediaType from './enums/AvatarMediaType';
+import AvatarMediaType from '../enums/AvatarMediaType';
 
 @Entity('avatars')
 export default class Avatar {

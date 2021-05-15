@@ -2,7 +2,7 @@ import { getRepository } from 'typeorm';
 import Lobby from '../models/entities/Lobby';
 import User from '../models/entities/User';
 import LobbyParticipant from '../models/entities/LobbyParticipant';
-import LobbyStatus from '../models/entities/enums/LobbyStatus';
+import LobbyStatus from '../models/enums/LobbyStatus';
 import logger from '../config/logger';
 import LobbyCreationResponseDto from '../models/responses/LobbyCreationResponseDto';
 import ClientError from '../models/error/ClientError';
@@ -60,12 +60,13 @@ export default {
     lobby = await getRepository(Lobby).save(lobby);
     logger.info(`Created lobby with id '${lobby.id}'.`);
 
-    let lobbyCreator = new LobbyParticipant();
+    const lobbyCreator = new LobbyParticipant();
     lobbyCreator.user = user;
     lobbyCreator.isCreator = true;
     lobbyCreator.isReady = true;
     lobbyCreator.lobby = lobby;
-    lobbyCreator = await getRepository(LobbyParticipant).save(lobbyCreator);
+    await getRepository(LobbyParticipant).save(lobbyCreator);
+
     logger.info(
       `Created lobby participant '${user.nickname}' with id '${user.id}', role - creator.`
     );
@@ -110,23 +111,32 @@ export default {
   },
 
   async deleteLobbyParticipant(userId: number): Promise<void> {
-    const lobbyParticipant = await getRepository(LobbyParticipant).findOne(
-      {
-        user: { id: userId },
-      },
-      { relations: ['lobby'], loadEagerRelations: false }
-    );
-
-    if (lobbyParticipant === undefined) {
-      throw new ClientError(USER_IS_NOT_A_LOBBY_MEMBER);
-    }
+    const lobbyParticipant = await this.loadLobbyParticipant(userId);
 
     if (lobbyParticipant.isCreator) {
       await this.deleteLobby(lobbyParticipant.lobby.id);
     }
 
     await getRepository(LobbyParticipant).delete(lobbyParticipant);
-    await logger.info(`User [USER_ID: ${userId}] left lobby`);
+    logger.info(`User [USER_ID: ${userId}] left lobby`);
+  },
+
+  async loadLobbyParticipant(userId: number): Promise<LobbyParticipant> {
+    const lobbyParticipant = await getRepository(LobbyParticipant).findOne(
+      {
+        user: { id: userId },
+      },
+      {
+        relations: ['lobby'],
+        loadEagerRelations: false,
+      }
+    );
+
+    if (lobbyParticipant === undefined) {
+      throw new ClientError(USER_IS_NOT_A_LOBBY_MEMBER);
+    }
+
+    return lobbyParticipant;
   },
 
   async getLobbyById(

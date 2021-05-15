@@ -1,9 +1,8 @@
 import WebSocket, { CloseEvent, MessageEvent } from 'ws';
 import TokenService from './TokenService';
 import logger from '../config/logger';
-import WSMessageType from '../models/entities/enums/WSMessageType';
-import ClientError from '../models/error/ClientError';
 import { WEBSOCKET_PORT } from '../config/appConfigProperties';
+import WebSocketPayloadDto from '../models/responses/WebSocketPayload';
 
 const WS_CONNECTION = 'connection';
 const WS_MESSAGE = 'message';
@@ -56,12 +55,14 @@ export default {
     });
   },
 
-  send(userId: number, type: WSMessageType, payload: unknown): void {
+  send(userId: number, payloadDto: WebSocketPayloadDto<unknown>): void {
     const wsClient = wsClients.get(userId);
+
     if (wsClient === undefined) {
-      throw new ClientError(`Client with such id ${userId} does not exist`);
+      logger.error(`WebSocket client with id ${userId} is not connected`);
+      return;
     }
 
-    wsClient.send(JSON.stringify({ type, payload }));
+    wsClient.send(JSON.stringify(payloadDto));
   },
 };
