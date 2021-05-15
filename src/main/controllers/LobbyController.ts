@@ -34,13 +34,20 @@ export class LobbyController extends Controller {
     return this.lobbyService.createLobby(request.user.id);
   }
 
-  @Delete('{lobbyId}')
+  @Post('{lobbyId}/participants')
   @Security('JWT')
-  public async dissolveLobby(
+  public async joinLobby(
     @Path() lobbyId: number,
     @Request() request: RequestWithUser
   ): Promise<void> {
-    await this.lobbyService.deleteLobby(lobbyId, request.user.id);
+    await this.lobbyService.createLobbyParticipant(lobbyId, request.user.id);
+    this.setStatus(StatusCodes.OK);
+  }
+
+  @Delete('/lobby-participant')
+  @Security('JWT')
+  public async leaveLobby(@Request() request: RequestWithUser): Promise<void> {
+    await this.lobbyService.deleteLobbyParticipant(request.user.id);
     this.setStatus(StatusCodes.OK);
   }
 
