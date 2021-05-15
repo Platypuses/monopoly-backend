@@ -1,12 +1,12 @@
 /* eslint-disable node/no-unpublished-import */
 
-import bodyParser from 'body-parser';
 import { createConnection } from 'typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import swaggerUi from 'swagger-ui-express';
-import { Express, NextFunction, Request, Response } from 'express';
+import express, { Express, NextFunction, Request, Response } from 'express';
 import cors from 'cors';
 import { RegisterRoutes } from '../tsoa/routes';
+import WebSocketService from './main/services/WebSocketService';
 import {
   POSTGRES_DB_HOST,
   POSTGRES_DB_NAME,
@@ -77,12 +77,13 @@ function configureErrorHandler(app: Express) {
 }
 
 export default async function configureServer(app: Express): Promise<void> {
-  app.use(bodyParser.urlencoded({ extended: true }));
-  app.use(bodyParser.json());
+  app.use(express.urlencoded({ extended: true }));
+  app.use(express.json());
   app.use(cors());
 
   await configureDatabaseConnection();
   configureSwaggerUI(app);
   RegisterRoutes(app);
   configureErrorHandler(app);
+  WebSocketService.configureWebsocketServer();
 }
