@@ -3,6 +3,7 @@ import LobbyParticipant from '../models/entities/LobbyParticipant';
 import Lobby from '../models/entities/Lobby';
 import ClientError from '../models/error/ClientError';
 import logger from '../config/logger';
+import LobbyStatus from '../models/entities/enums/LobbyStatus';
 
 const MAX_PLAYERS_NUMBER = 6;
 
@@ -25,6 +26,11 @@ export default {
     if (lobby.lobbyParticipants.length >= MAX_PLAYERS_NUMBER) {
       throw new ClientError(LOBBY_REFUSED_PLAYER);
     }
+
+    if (lobby.status !== LobbyStatus.WAITING_FOR_PLAYERS) {
+      throw new ClientError(LOBBY_REFUSED_PLAYER);
+    }
+
     const lobbyMember = await isLobbyParticipant(userId);
     if (lobbyMember) {
       throw new ClientError(USER_IS_A_LOBBY_MEMBER);
