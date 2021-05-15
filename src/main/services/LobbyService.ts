@@ -1,16 +1,29 @@
 import { getRepository } from 'typeorm';
 import Lobby from '../models/entities/Lobby';
+import User from '../models/entities/User';
 import LobbyParticipant from '../models/entities/LobbyParticipant';
 import LobbyStatus from '../models/entities/enums/LobbyStatus';
 import logger from '../config/logger';
 import LobbyCreationResponseDto from '../models/responses/LobbyCreationResponseDto';
 import ClientError from '../models/error/ClientError';
+import LobbyResponseDto from '../models/responses/LobbyResponseDto';
 import UserService from '../services/UserService';
 
 const LOBBY_DOES_NOT_EXIST = 'Лобби не существует';
 const USER_IS_IN_LOBBY = 'Вы уже являетесь участником лобби';
 const NOT_AN_OWNER = 'Вы не являетесь создателем лобби';
 const LOBBY_CREATOR_DOES_NOT_EXIST = 'Создать лобби не определён';
+const NOT_A_PARTICIPANT = 'Вы не являетесь участником этого лобби';
+
+async function checkThatUserParticipatesInLobby(user: User, lobby: Lobby) {
+  const lobbyParticipant = await getRepository(LobbyParticipant).findOne({
+    user,
+    lobby,
+  });
+  if (lobbyParticipant === undefined) {
+    throw new ClientError(NOT_A_PARTICIPANT);
+  }
+}
 
 async function isLobbyParticipant(userId: number): Promise<boolean> {
   const lobbyParticipant = await getRepository(LobbyParticipant).findOne({
@@ -85,5 +98,36 @@ export default {
 
     logger.info(`Delete lobby '${lobby.id}'`);
     await getRepository(Lobby).delete(lobby.id);
+  },
+
+  async getLobbyById(
+    lobbyId: number,
+    userId: number
+  ): Promise<LobbyResponseDto> {
+    const user = await UserService.getUserByIdIfExists(userId);
+    const lobby = await getLobbyByIdIfExists(lobbyId);
+
+    await checkThatUserParticipatesInLobby(user, lobby);
+
+    const lobbyParticipants = lobby.lobbyParticipants.map((participant) => ({
+      id: participant.user.id,
+      nickname: participant.user.nickname,
+      isCreator: participant.isCreator,
+      isReady: participant.isReady,
+    }));
+
+    const lobbyMessages = lobby.lobbyMessages.map((message) => ({
+      senderId: message.user.id,
+      senderNickname: message.user.nickname,
+      messageText: message.messageText,
+      messageDate: message.messageDate,
+    }));
+
+    return {
+      id: lobbyId,
+      status: lobby.status,
+      lobbyParticipants,
+      lobbyMessages,
+    };
   },
 };
