@@ -14,7 +14,10 @@ const MAX_PLAYERS_NUMBER = 6;
 const LOBBY_DOES_NOT_EXIST = 'Лобби не существует';
 const LOBBY_REFUSED_PLAYER = 'Лобби отклонило соединение';
 const LOBBY_CREATOR_DOES_NOT_EXIST = 'Создать лобби не определён';
+const USER_IS_A_LOBBY_MEMBER = 'Пользователь является участником лобби';
+const USER_IS_NOT_A_LOBBY_MEMBER = 'Пользователь не является участником лобби';
 const NOT_A_PARTICIPANT = 'Вы не являетесь участником этого лобби';
+const NOT_AN_OWNER = 'Вы не являетесь создателем лобби';
 
 async function checkThatUserParticipatesInLobby(user: User, lobby: Lobby) {
   const lobbyParticipant = await getRepository(LobbyParticipant).findOne({
@@ -25,10 +28,6 @@ async function checkThatUserParticipatesInLobby(user: User, lobby: Lobby) {
     throw new ClientError(NOT_A_PARTICIPANT);
   }
 }
-
-const USER_IS_A_LOBBY_MEMBER = 'Пользователь является участником лобби';
-const USER_IS_NOT_A_LOBBY_MEMBER = 'Пользователь не является участником лобби';
-const NOT_AN_OWNER = 'Вы не являетесь создателем лобби';
 
 async function isLobbyParticipant(userId: number): Promise<boolean> {
   const lobbyParticipant = await getRepository(LobbyParticipant).findOne({
@@ -147,6 +146,7 @@ export default {
 
     await getRepository(LobbyParticipant).delete(lobbyParticipant);
     await logger.info(`User [USER_ID: ${userId}] left lobby`);
+  },
 
   async getLobbyById(
     lobbyId: number,
@@ -177,6 +177,5 @@ export default {
       lobbyParticipants,
       lobbyMessages,
     };
-
   },
 };
