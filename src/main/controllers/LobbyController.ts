@@ -7,12 +7,13 @@ import {
   Tags,
   Delete,
   Path,
+  Get,
 } from 'tsoa';
 import { StatusCodes } from 'http-status-codes';
 import LobbyService from '../services/LobbyService';
 import LobbyCreationResponseDto from '../models/responses/LobbyCreationResponseDto';
 import { RequestWithUser } from '../security/JwtAuthMiddleware';
-import logger from '../config/logger';
+import LobbyResponseDto from '../models/responses/LobbyResponseDto';
 
 @Route('/api/v1/lobbies')
 @Tags('Lobby Controller')
@@ -46,7 +47,6 @@ export class LobbyController extends Controller {
   @Delete('/lobby-participant')
   @Security('JWT')
   public async leaveLobby(@Request() request: RequestWithUser): Promise<void> {
-    logger.info(request.user.id);
     await this.lobbyService.deleteLobbyParticipant(request.user.id);
     this.setStatus(StatusCodes.OK);
   }
@@ -59,5 +59,14 @@ export class LobbyController extends Controller {
   ): Promise<void> {
     await this.lobbyService.deleteLobby(lobbyId, request.user.id);
     this.setStatus(StatusCodes.OK);
+  }
+
+  @Get('{lobbyId}')
+  @Security('JWT')
+  public async getLobby(
+    @Path() lobbyId: number,
+    @Request() request: RequestWithUser
+  ): Promise<LobbyResponseDto> {
+    return this.lobbyService.getLobbyById(lobbyId, request.user.id);
   }
 }
