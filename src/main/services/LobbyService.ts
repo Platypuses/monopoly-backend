@@ -13,11 +13,10 @@ const MAX_PLAYERS_NUMBER = 6;
 
 const LOBBY_DOES_NOT_EXIST = 'Лобби не существует';
 const LOBBY_REFUSED_PLAYER = 'Лобби отклонило соединение';
-const LOBBY_CREATOR_DOES_NOT_EXIST = 'Создать лобби не определён';
 const USER_IS_A_LOBBY_MEMBER = 'Пользователь является участником лобби';
 const USER_IS_NOT_A_LOBBY_MEMBER = 'Пользователь не является участником лобби';
-const NOT_A_PARTICIPANT = 'Вы не являетесь участником этого лобби';
-const NOT_AN_OWNER = 'Вы не являетесь создателем лобби';
+
+/* const NOT_AN_OWNER = 'Вы не являетесь создателем лобби'; */
 
 async function checkThatUserParticipatesInLobby(user: User, lobby: Lobby) {
   const lobbyParticipant = await getRepository(LobbyParticipant).findOne({
@@ -25,7 +24,7 @@ async function checkThatUserParticipatesInLobby(user: User, lobby: Lobby) {
     lobby,
   });
   if (lobbyParticipant === undefined) {
-    throw new ClientError(NOT_A_PARTICIPANT);
+    throw new ClientError(USER_IS_NOT_A_LOBBY_MEMBER);
   }
 }
 
@@ -50,27 +49,6 @@ async function getLobbyByIdIfExists(lobbyId: number): Promise<Lobby> {
 async function checkThatUserIsNotLobbyParticipant(userId: number) {
   if (await isLobbyParticipant(userId)) {
     throw new ClientError(USER_IS_A_LOBBY_MEMBER);
-  }
-}
-
-async function isLobbyCreator(
-  userId: number,
-  lobbyId: number
-): Promise<boolean> {
-  const lobbyCreator = await getRepository(LobbyParticipant).findOne({
-    lobby: { id: lobbyId },
-    isCreator: true,
-  });
-
-  if (lobbyCreator === undefined) {
-    throw new ClientError(LOBBY_CREATOR_DOES_NOT_EXIST);
-  }
-  return userId === lobbyCreator.user.id;
-}
-
-async function checkThatUserIsLobbyCreator(userId: number, lobbyId: number) {
-  if (!(await isLobbyCreator(userId, lobbyId))) {
-    throw new ClientError(NOT_AN_OWNER);
   }
 }
 
@@ -99,12 +77,10 @@ export default {
     };
   },
 
-  async deleteLobby(lobbyId: number, userId: number): Promise<void> {
-    const user = await UserService.getUserByIdIfExists(userId);
+  async deleteLobby(lobbyId: number): Promise<void> {
     const lobby = await getLobbyByIdIfExists(lobbyId);
-    await checkThatUserIsLobbyCreator(user.id, lobby.id);
 
-    logger.info(`Delete lobby '${lobby.id}'`);
+    logger.info(`Lobby [LOBBY_ID:'${lobby.id}'] has been deleted`);
     await getRepository(Lobby).delete(lobby.id);
   },
 
@@ -136,12 +112,19 @@ export default {
   },
 
   async deleteLobbyParticipant(userId: number): Promise<void> {
-    const lobbyParticipant = await getRepository(LobbyParticipant).findOne({
-      user: { id: userId },
-    });
+    const lobbyParticipant = await getRepository(LobbyParticipant).findOne(
+      {
+        user: { id: userId },
+      },
+      { relations: ['lobby'], loadEagerRelations: false }
+    );
 
     if (lobbyParticipant === undefined) {
       throw new ClientError(USER_IS_NOT_A_LOBBY_MEMBER);
+    }
+
+    if (lobbyParticipant.isCreator) {
+      await this.deleteLobby((await lobbyParticipant.lobby).id);
     }
 
     await getRepository(LobbyParticipant).delete(lobbyParticipant);

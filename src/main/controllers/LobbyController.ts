@@ -51,16 +51,6 @@ export class LobbyController extends Controller {
     this.setStatus(StatusCodes.OK);
   }
 
-  @Delete('/{lobbyId}')
-  @Security('JWT')
-  public async dissolveLobby(
-    @Path() lobbyId: number,
-    @Request() request: RequestWithUser
-  ): Promise<void> {
-    await this.lobbyService.deleteLobby(lobbyId, request.user.id);
-    this.setStatus(StatusCodes.OK);
-  }
-
   @Get('{lobbyId}')
   @Security('JWT')
   public async getLobby(
