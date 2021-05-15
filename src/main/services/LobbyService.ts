@@ -122,7 +122,7 @@ export default {
     }
 
     if (lobbyParticipant.isCreator) {
-      await this.deleteLobby((await lobbyParticipant.lobby).id);
+      await this.deleteLobby(lobbyParticipant.lobby.id);
     }
 
     await getRepository(LobbyParticipant).delete(lobbyParticipant);
