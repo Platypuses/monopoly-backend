@@ -1,5 +1,5 @@
 import GameStateDto from '../../../models/responses/game/state/GameStateDto';
-import PlayerOnVacantPropertyDto from '../../../models/responses/game/events/PlayerOnVacantPropertyDto';
+import PlayerOnVacantPropertyEventPayload from '../../../models/responses/game/events/PlayerOnVacantPropertyEventPayload';
 import WebSocketEventEnum from '../../../models/enums/WebSocketEventEnum';
 import WebSocketService from '../../WebSocketService';
 
@@ -9,7 +9,7 @@ export default {
     playerId: number,
     cellId: number
   ): void {
-    const eventPayload: PlayerOnVacantPropertyDto = {
+    const eventPayload: PlayerOnVacantPropertyEventPayload = {
       playerId,
       cellId,
     };
