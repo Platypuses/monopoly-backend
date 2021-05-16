@@ -4,11 +4,11 @@ import WebSocketService from '../../WebSocketService';
 import PlayerBalanceChangeEventPayload from '../../../models/responses/game/events/PlayerBalanceChangeEventPayload';
 
 export default {
-  async dispatchEvent(
+  dispatchEvent(
     gameState: GameStateDto,
     playerId: number,
     balanceDelta: number
-  ): Promise<void> {
+  ): void {
     const eventPayload: PlayerBalanceChangeEventPayload = {
       playerId,
       balanceDelta,

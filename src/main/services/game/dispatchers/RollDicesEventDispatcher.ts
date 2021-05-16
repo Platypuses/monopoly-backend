@@ -12,7 +12,7 @@ function generateDiceNumber() {
 }
 
 export default {
-  async dispatchEvent(gameState: GameStateDto): Promise<void> {
+  dispatchEvent(gameState: GameStateDto): void {
     const firstDiceNumber = generateDiceNumber();
     const secondDiceNumber = generateDiceNumber();
 

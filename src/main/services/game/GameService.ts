@@ -1,17 +1,14 @@
 import { getRepository } from 'typeorm';
-import GameStateDto from '../models/responses/game/state/GameStateDto';
-import Lobby from '../models/entities/Lobby';
-import LobbyParticipant from '../models/entities/LobbyParticipant';
-import ClientError from '../models/error/ClientError';
-import Game from '../models/entities/Game';
-import PlayerDto from '../models/responses/game/state/PlayerDto';
-import logger from '../config/logger';
-import LobbyService from './LobbyService';
-import LobbyStatus from '../models/enums/LobbyStatus';
-import GameCellDto from '../models/responses/game/state/GameCellDto';
-import GameLoopService from './game/GameLoopService';
-
-const GAME_DOES_NOT_EXIST = 'Игра не существует';
+import GameStateDto from '../../models/responses/game/state/GameStateDto';
+import Lobby from '../../models/entities/Lobby';
+import LobbyParticipant from '../../models/entities/LobbyParticipant';
+import Game from '../../models/entities/Game';
+import PlayerDto from '../../models/responses/game/state/PlayerDto';
+import logger from '../../config/logger';
+import LobbyService from '../LobbyService';
+import LobbyStatus from '../../models/enums/LobbyStatus';
+import GameCellDto from '../../models/responses/game/state/GameCellDto';
+import GameLoopService from './GameLoopService';
 
 const DEFAULT_BALANCE = 1500;
 const DEFAULT_CELL_ID = 1;
@@ -88,21 +85,40 @@ export default {
       status: LobbyStatus.IN_GAME,
     });
 
-    GameLoopService.run(gameState);
+    GameLoopService.start(gameState);
 
     logger.info(`Saved game with id ${savedGame.id}`);
 
     return gameState;
   },
 
-  async getGameState(userId: number): Promise<GameStateDto> {
+  async stopGame(userId: number): Promise<void> {
     const lobbyParticipant = await LobbyService.loadLobbyParticipant(userId);
-    const { game } = lobbyParticipant.lobby;
+    const { lobby } = lobbyParticipant;
 
-    if (game === undefined || game.stateJson === undefined) {
-      throw new ClientError(GAME_DOES_NOT_EXIST);
+    if (lobby.game === undefined) {
+      return;
     }
 
-    return JSON.parse(game.stateJson);
+    GameLoopService.stop(lobby.game.id);
+    await LobbyService.deleteLobby(lobby.id);
+    logger.info(`Stopped game with id ${lobby.game.id}`);
+  },
+
+  getGameState(gameId: number): GameStateDto {
+    return GameLoopService.getState(gameId);
+  },
+
+  async saveGameState(gameState: GameStateDto): Promise<void> {
+    const gameRepository = getRepository(Game);
+    const game = await gameRepository.findOne(gameState.gameId);
+
+    if (game === undefined) {
+      return;
+    }
+
+    game.stateJson = JSON.stringify(gameState);
+    await gameRepository.save(game);
+    logger.info(`Saved game state of game with id ${gameState.gameId}`);
   },
 };

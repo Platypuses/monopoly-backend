@@ -1,5 +1,16 @@
-import { Controller, Get, Post, Request, Route, Security, Tags } from 'tsoa';
-import GameService from '../services/GameService';
+import {
+  Controller,
+  Delete,
+  Get,
+  Path,
+  Post,
+  Request,
+  Route,
+  Security,
+  Tags,
+} from 'tsoa';
+import { StatusCodes } from 'http-status-codes';
+import GameService from '../services/game/GameService';
 import { RequestWithUser } from '../security/JwtAuthMiddleware';
 import GameStateDto from '../models/responses/game/state/GameStateDto';
 
@@ -22,11 +33,16 @@ export class GameController extends Controller {
     return this.gameService.startGame(request.user.id);
   }
 
-  @Get()
+  @Delete()
   @Security('JWT')
-  public async getGameState(
-    @Request() request: RequestWithUser
-  ): Promise<GameStateDto> {
-    return this.gameService.getGameState(request.user.id);
+  public async stopGame(@Request() request: RequestWithUser): Promise<void> {
+    await this.gameService.stopGame(request.user.id);
+    this.setStatus(StatusCodes.OK);
+  }
+
+  @Get('/{gameId}')
+  @Security('JWT')
+  public getGameState(@Path() gameId: number): GameStateDto {
+    return this.gameService.getGameState(gameId);
   }
 }
