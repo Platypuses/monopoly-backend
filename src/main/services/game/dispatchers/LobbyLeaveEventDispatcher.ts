@@ -6,12 +6,12 @@ import LobbyJoinLeaveEventPayload from '../../../models/responses/game/events/Lo
 export default {
   dispatchEvent(
     userId: number,
-    username: string,
+    nickname: string,
     lobbyParticipants: LobbyParticipant[]
   ): void {
     const eventPayload: LobbyJoinLeaveEventPayload = {
       userId,
-      username,
+      nickname,
     };
 
     const websocketPayload = {

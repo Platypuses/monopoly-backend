@@ -10,7 +10,7 @@ import LobbyResponseDto from '../models/responses/LobbyResponseDto';
 import UserService from '../services/UserService';
 import LobbyJoinEventDispatcher from './game/dispatchers/LobbyJoinEventDispatcher';
 import LobbyLeaveEventDispatcher from './game/dispatchers/LobbyLeaveEventDispatcher';
-import LobbyDissolveEventDispatch from './game/dispatchers/LobbyDissolveEventDispatcher';
+import LobbyDissolveEventDispatcher from './game/dispatchers/LobbyDissolveEventDispatcher';
 
 const MAX_PLAYERS_NUMBER = 6;
 
@@ -84,7 +84,10 @@ export default {
 
     logger.info(`Lobby [LOBBY_ID:'${lobby.id}'] has been deleted`);
 
-    LobbyDissolveEventDispatch.dispatchEvent(lobby.lobbyParticipants, lobbyId);
+    LobbyDissolveEventDispatcher.dispatchEvent(
+      lobby.lobbyParticipants,
+      lobbyId
+    );
 
     await getRepository(Lobby).delete(lobby.id);
   },
