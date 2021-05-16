@@ -3,6 +3,7 @@ import GameStateDto from '../../models/responses/game/state/GameStateDto';
 import ClientError from '../../models/error/ClientError';
 import LobbyService from '../LobbyService';
 
+const NO_ACTIVE_GAME = 'Не найдено активных игр';
 const YOU_ARE_NOT_GAME_PARTICIPANT = 'Вы не участник игры';
 const NOT_YOUR_MOVE = 'Не ваш ход';
 
@@ -28,25 +29,37 @@ function isUserNotCurrentMovePlayer(
   return gameState.currentMovePlayerId !== userId;
 }
 
+function validatePlayer(gameState: GameStateDto, userId: number) {
+  if (isUserNotInGame(gameState, userId)) {
+    throw new ClientError(YOU_ARE_NOT_GAME_PARTICIPANT);
+  }
+
+  if (isUserNotCurrentMovePlayer(gameState, userId)) {
+    throw new ClientError(NOT_YOUR_MOVE);
+  }
+}
+
+async function getGameStateByPlayerId(playerId: number): Promise<GameStateDto> {
+  const lobbyParticipant = await LobbyService.loadLobbyParticipant(playerId);
+  const { lobby } = lobbyParticipant;
+
+  if (lobby.game === null) {
+    throw new ClientError(NO_ACTIVE_GAME);
+  }
+
+  return GameLoopService.getState(lobby.game.id);
+}
+
 export default {
   async rollDices(userId: number): Promise<void> {
-    const lobbyParticipant = await LobbyService.loadLobbyParticipant(userId);
-    const { lobby } = lobbyParticipant;
-
-    if (lobby.game === null) {
-      return;
-    }
-
-    const gameState = GameLoopService.getState(lobby.game.id);
-
-    if (isUserNotInGame(gameState, userId)) {
-      throw new ClientError(YOU_ARE_NOT_GAME_PARTICIPANT);
-    }
-
-    if (isUserNotCurrentMovePlayer(gameState, userId)) {
-      throw new ClientError(NOT_YOUR_MOVE);
-    }
-
+    const gameState = await getGameStateByPlayerId(userId);
+    validatePlayer(gameState, userId);
     GameLoopService.rollDices(gameState);
+  },
+
+  async declinePurchase(userId: number): Promise<void> {
+    const gameState = await getGameStateByPlayerId(userId);
+    validatePlayer(gameState, userId);
+    GameLoopService.declinePurchase(gameState);
   },
 };
