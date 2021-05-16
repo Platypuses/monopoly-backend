@@ -6,6 +6,7 @@ import ClientError from '../../models/error/ClientError';
 import GameService from './GameService';
 import logger from '../../config/logger';
 import PlayerDeclinePurchaseEventDispatcher from './dispatchers/PlayerDeclinePurchaseEventDispatcher';
+import PlayerAcceptPurchaseEventDispatcher from './dispatchers/PlayerAcceptPurchaseEventDispatcher';
 
 const GAME_IS_NOT_RUNNING = 'Игра не запущена';
 const PLAYER_NOT_FOUND = 'Игрок не найден';
@@ -105,7 +106,11 @@ export default {
     // eslint-disable-next-line no-param-reassign
     gameState.currentMovePlayerId = getNextPlayerId(gameState);
 
-    // TODO dispatcher
+    PlayerAcceptPurchaseEventDispatcher.dispatchEvent(
+      gameState,
+      playerId,
+      cellId
+    );
   },
 
   declinePurchase(gameState: GameStateDto): void {
