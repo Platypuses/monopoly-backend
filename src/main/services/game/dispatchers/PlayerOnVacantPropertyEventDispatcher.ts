@@ -1,7 +1,7 @@
 import GameStateDto from '../../../models/responses/game/state/GameStateDto';
 import PlayerOnVacantPropertyEventPayload from '../../../models/responses/game/events/PlayerOnVacantPropertyEventPayload';
 import WebSocketEventEnum from '../../../models/enums/WebSocketEventEnum';
-import WebSocketService from '../../WebSocketService';
+import GameWebSocketUtils from '../utils/GameWebSocketUtils';
 
 export default {
   dispatchEvent(
@@ -14,13 +14,10 @@ export default {
       cellId,
     };
 
-    const webSocketPayload = {
-      event: WebSocketEventEnum.PLAYER_ON_VACANT_PROPERTY,
-      payload: eventPayload,
-    };
-
-    gameState.players.forEach((player) =>
-      WebSocketService.send(player.playerId, webSocketPayload)
+    GameWebSocketUtils.sendGameEventToAll(
+      gameState,
+      WebSocketEventEnum.PLAYER_ON_VACANT_PROPERTY,
+      eventPayload
     );
   },
 };
