@@ -1,7 +1,7 @@
 import WebSocketEventEnum from '../../../models/enums/WebSocketEventEnum';
-import WebSocketService from '../../WebSocketService';
 import GameStateDto from '../../../models/responses/game/state/GameStateDto';
 import PlayerOnChanceCellEventPayload from '../../../models/responses/game/events/PlayerOnChanceCellEventPayload';
+import GameWebSocketUtils from '../utils/GameWebSocketUtils';
 
 export default {
   dispatchEvent(
@@ -16,13 +16,10 @@ export default {
       description,
     };
 
-    const webSocketPayload = {
-      event: WebSocketEventEnum.PLAYER_ON_CHANCE_CELL,
-      payload: eventPayload,
-    };
-
-    gameState.players.forEach((player) =>
-      WebSocketService.send(player.playerId, webSocketPayload)
+    GameWebSocketUtils.sendGameEventToAll(
+      gameState,
+      WebSocketEventEnum.PLAYER_ON_CHANCE_CELL,
+      eventPayload
     );
   },
 };

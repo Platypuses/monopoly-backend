@@ -1,7 +1,7 @@
 import GameStateDto from '../../../models/responses/game/state/GameStateDto';
 import RollDicesEventPayload from '../../../models/responses/game/events/RollDicesEventPayload';
 import WebSocketEventEnum from '../../../models/enums/WebSocketEventEnum';
-import WebSocketService from '../../WebSocketService';
+import GameWebSocketUtils from '../utils/GameWebSocketUtils';
 
 const MIN_DICE_NUMBER = 1;
 const MAX_DICE_NUMBER = 6;
@@ -22,13 +22,10 @@ export default {
       secondDiceNumber,
     };
 
-    const webSocketPayload = {
-      event: WebSocketEventEnum.ROLL_DICES,
-      payload: eventPayload,
-    };
-
-    gameState.players.forEach((player) =>
-      WebSocketService.send(player.playerId, webSocketPayload)
+    GameWebSocketUtils.sendGameEventToAll(
+      gameState,
+      WebSocketEventEnum.ROLL_DICES,
+      eventPayload
     );
   },
 };

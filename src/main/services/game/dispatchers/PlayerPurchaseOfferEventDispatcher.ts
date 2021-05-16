@@ -1,6 +1,6 @@
 import PlayerPurchaseOfferEventPayload from '../../../models/responses/game/events/PlayerPurchaseOfferEventPayload';
 import WebSocketEventEnum from '../../../models/enums/WebSocketEventEnum';
-import WebSocketService from '../../WebSocketService';
+import GameWebSocketUtils from '../utils/GameWebSocketUtils';
 
 export default {
   dispatchEvent(playerId: number, cellId: number): void {
@@ -8,11 +8,10 @@ export default {
       cellId,
     };
 
-    const webSocketPayload = {
-      event: WebSocketEventEnum.PROPERTY_PURCHASE_OFFER,
-      payload: eventPayload,
-    };
-
-    WebSocketService.send(playerId, webSocketPayload);
+    GameWebSocketUtils.sendGameEvent(
+      playerId,
+      WebSocketEventEnum.PROPERTY_PURCHASE_OFFER,
+      eventPayload
+    );
   },
 };
