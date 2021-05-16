@@ -1,10 +1,11 @@
 import WebSocketEventEnum from '../../../models/enums/WebSocketEventEnum';
 import WebSocketService from '../../WebSocketService';
 import LobbyParticipant from '../../../models/entities/LobbyParticipant';
+import LobbyDissolveEventPayload from '../../../models/responses/game/events/LobbyDissolveEventPayload';
 
 export default {
   dispatchEvent(lobbyParticipants: LobbyParticipant[], lobbyId: number): void {
-    const eventPayload = {
+    const eventPayload: LobbyDissolveEventPayload = {
       lobbyId,
     };
 

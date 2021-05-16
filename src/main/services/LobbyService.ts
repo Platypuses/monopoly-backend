@@ -10,7 +10,7 @@ import LobbyResponseDto from '../models/responses/LobbyResponseDto';
 import UserService from '../services/UserService';
 import LobbyJoinEventDispatcher from './game/dispatchers/LobbyJoinEventDispatcher';
 import LobbyLeaveEventDispatcher from './game/dispatchers/LobbyLeaveEventDispatcher';
-import LobbyDissolveEventDispatch from './game/dispatchers/LobbyDissolveEventDispatch';
+import LobbyDissolveEventDispatch from './game/dispatchers/LobbyDissolveEventDispatcher';
 
 const MAX_PLAYERS_NUMBER = 6;
 
@@ -111,7 +111,12 @@ export default {
       isReady: false,
     });
 
-    LobbyJoinEventDispatcher.dispatchEvent(lobby.lobbyParticipants, userId);
+    const user = await UserService.getUserByIdIfExists(userId);
+    LobbyJoinEventDispatcher.dispatchEvent(
+      user.id,
+      user.nickname,
+      lobby.lobbyParticipants
+    );
 
     logger.info(
       `User [USER_ID: ${userId}] joined lobby [LOBBY_ID: ${lobbyId}]`
@@ -128,9 +133,11 @@ export default {
 
     await getRepository(LobbyParticipant).delete(lobbyParticipant);
 
+    const user = await UserService.getUserByIdIfExists(userId);
     LobbyLeaveEventDispatcher.dispatchEvent(
-      lobbyParticipant.lobby.lobbyParticipants,
-      userId
+      user.id,
+      user.nickname,
+      lobbyParticipant.lobby.lobbyParticipants
     );
 
     logger.info(`User [USER_ID: ${userId}] left lobby`);
