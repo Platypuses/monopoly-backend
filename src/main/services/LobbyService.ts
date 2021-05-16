@@ -8,6 +8,9 @@ import LobbyCreationResponseDto from '../models/responses/LobbyCreationResponseD
 import ClientError from '../models/error/ClientError';
 import LobbyResponseDto from '../models/responses/LobbyResponseDto';
 import UserService from '../services/UserService';
+import LobbyJoinEventDispatcher from './game/dispatchers/LobbyJoinEventDispatcher';
+import LobbyLeaveEventDispatcher from './game/dispatchers/LobbyLeaveEventDispatcher';
+import LobbyDissolveEventDispatcher from './game/dispatchers/LobbyDissolveEventDispatcher';
 
 const MAX_PLAYERS_NUMBER = 6;
 
@@ -80,6 +83,12 @@ export default {
     const lobby = await getLobbyByIdIfExists(lobbyId);
 
     logger.info(`Lobby [LOBBY_ID:'${lobby.id}'] has been deleted`);
+
+    LobbyDissolveEventDispatcher.dispatchEvent(
+      lobby.lobbyParticipants,
+      lobbyId
+    );
+
     await getRepository(Lobby).delete(lobby.id);
   },
 
@@ -105,6 +114,13 @@ export default {
       isReady: false,
     });
 
+    const user = await UserService.getUserByIdIfExists(userId);
+    LobbyJoinEventDispatcher.dispatchEvent(
+      user.id,
+      user.nickname,
+      lobby.lobbyParticipants
+    );
+
     logger.info(
       `User [USER_ID: ${userId}] joined lobby [LOBBY_ID: ${lobbyId}]`
     );
@@ -115,9 +131,18 @@ export default {
 
     if (lobbyParticipant.isCreator) {
       await this.deleteLobby(lobbyParticipant.lobby.id);
+      return;
     }
 
     await getRepository(LobbyParticipant).delete(lobbyParticipant);
+
+    const user = await UserService.getUserByIdIfExists(userId);
+    LobbyLeaveEventDispatcher.dispatchEvent(
+      user.id,
+      user.nickname,
+      lobbyParticipant.lobby.lobbyParticipants
+    );
+
     logger.info(`User [USER_ID: ${userId}] left lobby`);
   },
 
