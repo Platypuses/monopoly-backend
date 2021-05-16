@@ -82,11 +82,11 @@ export default {
     });
 
     if (user === undefined) {
-      throw new ClientError(USER_WITH_THAT_NICKNAME_DOES_NOT_EXIST, 401);
+      throw new ClientError(USER_WITH_THAT_NICKNAME_DOES_NOT_EXIST);
     }
 
     if (!(await Bcrypt.compare(password, user.password))) {
-      throw new ClientError(INCORRECT_PASSWORD, 401);
+      throw new ClientError(INCORRECT_PASSWORD);
     }
 
     logger.info(`Getting user by nickname == ${nickname}`);
