@@ -59,7 +59,9 @@ export default {
     const wsClient = wsClients.get(userId);
 
     if (wsClient === undefined) {
-      logger.error(`WebSocket client with id ${userId} is not connected`);
+      logger.error(
+        `WebSocket client with id ${userId} is not connected. Event: ${payloadDto.event}`
+      );
       return;
     }
 

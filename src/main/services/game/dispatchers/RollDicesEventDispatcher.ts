@@ -1,6 +1,5 @@
 import GameStateDto from '../../../models/responses/game/state/GameStateDto';
 import RollDicesEventPayload from '../../../models/responses/game/events/RollDicesEventPayload';
-import WebSocketPayloadDto from '../../../models/responses/WebSocketPayload';
 import WebSocketEventEnum from '../../../models/enums/WebSocketEventEnum';
 import WebSocketService from '../../WebSocketService';
 
@@ -23,7 +22,7 @@ export default {
       secondDiceNumber,
     };
 
-    const webSocketPayload: WebSocketPayloadDto<RollDicesEventPayload> = {
+    const webSocketPayload = {
       event: WebSocketEventEnum.ROLL_DICES,
       payload: eventPayload,
     };
