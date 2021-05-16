@@ -10,6 +10,7 @@ enum WebSocketEventEnum {
   PLAYER_ON_TAX_CELL = 'PLAYER_ON_TAX_CELL',
   PLAYER_BALANCE_CHANGE = 'PLAYER_BALANCE_CHANGE',
   LOBBY_JOIN = 'LOBBY_JOIN',
+  LOBBY_LEAVE = 'LOBBY_LEAVE',
 }
 
 export default WebSocketEventEnum;

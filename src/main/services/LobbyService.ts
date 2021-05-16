@@ -9,6 +9,7 @@ import ClientError from '../models/error/ClientError';
 import LobbyResponseDto from '../models/responses/LobbyResponseDto';
 import UserService from '../services/UserService';
 import LobbyJoinEventDispatcher from './game/dispatchers/LobbyJoinEventDispatcher';
+import LobbyLeaveEventDispatcher from './game/dispatchers/LobbyLeaveEventDispatcher';
 
 const MAX_PLAYERS_NUMBER = 6;
 
@@ -118,9 +119,16 @@ export default {
 
     if (lobbyParticipant.isCreator) {
       await this.deleteLobby(lobbyParticipant.lobby.id);
+      return;
     }
 
     await getRepository(LobbyParticipant).delete(lobbyParticipant);
+
+    LobbyLeaveEventDispatcher.dispatchEvent(
+      lobbyParticipant.lobby.lobbyParticipants,
+      userId
+    );
+
     logger.info(`User [USER_ID: ${userId}] left lobby`);
   },
 
