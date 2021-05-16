@@ -8,6 +8,7 @@ import LobbyCreationResponseDto from '../models/responses/LobbyCreationResponseD
 import ClientError from '../models/error/ClientError';
 import LobbyResponseDto from '../models/responses/LobbyResponseDto';
 import UserService from '../services/UserService';
+import LobbyJoinEventDispatcher from './game/dispatchers/LobbyJoinEventDispatcher';
 
 const MAX_PLAYERS_NUMBER = 6;
 
@@ -104,6 +105,8 @@ export default {
       isCreator: false,
       isReady: false,
     });
+
+    LobbyJoinEventDispatcher.dispatchEvent(lobby.lobbyParticipants, userId);
 
     logger.info(
       `User [USER_ID: ${userId}] joined lobby [LOBBY_ID: ${lobbyId}]`

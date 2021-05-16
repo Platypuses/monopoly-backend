@@ -6,14 +6,14 @@ import LobbyService from '../LobbyService';
 const YOU_ARE_NOT_GAME_PARTICIPANT = 'Вы не участник игры';
 const NOT_YOUR_MOVE = 'Не ваш ход';
 
-function isUserNotInGame(gameState: GameStateDto, userId: number): boolean {
-  let checkResult = true;
+function isUserInGame(gameState: GameStateDto, userId: number): boolean {
+  let checkResult = false;
 
   for (let i = 0; i < gameState.players.length; i++) {
     const player = gameState.players[i];
 
     if (player.playerId === userId) {
-      checkResult = false;
+      checkResult = true;
       break;
     }
   }
@@ -39,7 +39,7 @@ export default {
 
     const gameState = GameLoopService.getState(lobby.game.id);
 
-    if (isUserNotInGame(gameState, userId)) {
+    if (!isUserInGame(gameState, userId)) {
       throw new ClientError(YOU_ARE_NOT_GAME_PARTICIPANT);
     }
 
