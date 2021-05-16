@@ -4,8 +4,10 @@ import PlayerBalanceChangeEventDispatcher from './dispatchers/PlayerBalanceChang
 import ClientError from '../../models/error/ClientError';
 import GameService from './GameService';
 import logger from '../../config/logger';
+import PlayerDeclinePurchaseEventDispatcher from './dispatchers/PlayerDeclinePurchaseEventDispatcher';
 
 const GAME_IS_NOT_RUNNING = 'Игра не запущена';
+const PLAYER_NOT_FOUND = 'Игрок не найден';
 const SAVE_STATE_INTERVAL = 30000;
 
 const gamesStatesMap = new Map<number, GameStateDto>();
@@ -36,6 +38,38 @@ async function saveGameStateToDatabase(
   await GameService.saveGameState(gameState);
 }
 
+function getNextPlayerId(gameState: GameStateDto): number {
+  const currentPlayerIndex = gameState.players.findIndex(
+    (player) => player.playerId === gameState.currentMovePlayerId
+  );
+
+  let nextPlayerIndex;
+  if (currentPlayerIndex === gameState.players.length - 1) {
+    nextPlayerIndex = 0;
+  } else {
+    nextPlayerIndex = currentPlayerIndex + 1;
+  }
+
+  const { playerId: nextPlayerUserId } = gameState.players[nextPlayerIndex];
+
+  return nextPlayerUserId;
+}
+function getCellIdByPlayerId(
+  gameState: GameStateDto,
+  playerId: number
+): number {
+  const playerById = gameState.players.find(
+    (player) => player.playerId === playerId
+  );
+
+  if (playerById === undefined) {
+    throw new ClientError(PLAYER_NOT_FOUND);
+  }
+  const { cellId } = playerById;
+
+  return cellId;
+}
+
 export default {
   start(gameState: GameStateDto): void {
     gamesStatesMap.set(gameState.gameId, gameState);
@@ -64,5 +98,19 @@ export default {
 
   rollDices(gameState: GameStateDto): void {
     RollDicesEventDispatcher.dispatchEvent(gameState);
+  },
+
+  declinePurchase(gameState: GameStateDto): void {
+    const playerId = gameState.currentMovePlayerId;
+    const cellId = getCellIdByPlayerId(gameState, playerId);
+
+    // eslint-disable-next-line no-param-reassign
+    gameState.currentMovePlayerId = getNextPlayerId(gameState);
+
+    PlayerDeclinePurchaseEventDispatcher.dispatchEvent(
+      gameState,
+      playerId,
+      cellId
+    );
   },
 };

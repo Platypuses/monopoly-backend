@@ -20,4 +20,13 @@ export class GameActionsController extends Controller {
     await this.gameActionsService.rollDices(request.user.id);
     this.setStatus(StatusCodes.OK);
   }
+
+  @Post('/purchase-declining')
+  @Security('JWT')
+  public async declinePurchase(
+    @Request() request: RequestWithUser
+  ): Promise<void> {
+    await this.gameActionsService.declinePurchase(request.user.id);
+    this.setStatus(StatusCodes.OK);
+  }
 }
