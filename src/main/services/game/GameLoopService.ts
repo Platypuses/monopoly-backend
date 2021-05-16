@@ -1,7 +1,6 @@
 import GameStateDto from '../../models/responses/game/state/GameStateDto';
 import GameCellDto from '../../models/responses/game/state/GameCellDto';
 import RollDicesEventDispatcher from './dispatchers/RollDicesEventDispatcher';
-import PlayerBalanceChangeEventDispatcher from './dispatchers/PlayerBalanceChangeEventDispatcher';
 import ClientError from '../../models/error/ClientError';
 import GameService from './GameService';
 import logger from '../../config/logger';
@@ -14,15 +13,6 @@ const CELL_NOT_FOUND = 'Клетка не найдена';
 const SAVE_STATE_INTERVAL = 30000;
 
 const gamesStatesMap = new Map<number, GameStateDto>();
-
-function testBalanceChange(gameState: GameStateDto) {
-  const randomBalanceDelta = Math.floor(Math.random() * 201) - 100;
-  PlayerBalanceChangeEventDispatcher.dispatchEvent(
-    gameState,
-    gameState.players[0].playerId,
-    randomBalanceDelta
-  );
-}
 
 async function saveGameStateToDatabase(
   gameId: number,
@@ -74,8 +64,6 @@ export default {
       async () => saveGameStateToDatabase(gameState.gameId, interval),
       SAVE_STATE_INTERVAL
     );
-
-    setInterval(() => testBalanceChange(gameState), 5000);
   },
 
   stop(gameId: number): void {
