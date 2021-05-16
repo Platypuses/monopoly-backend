@@ -21,5 +21,5 @@ export default class Game {
   lobby!: Lobby;
 
   @Column('text')
-  stateJson: string | undefined;
+  stateJson!: string | null;
 }

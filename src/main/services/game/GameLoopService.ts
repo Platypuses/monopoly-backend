@@ -3,6 +3,7 @@ import RollDicesEventDispatcher from './dispatchers/RollDicesEventDispatcher';
 import PlayerBalanceChangeEventDispatcher from './dispatchers/PlayerBalanceChangeEventDispatcher';
 import ClientError from '../../models/error/ClientError';
 import GameService from './GameService';
+import logger from '../../config/logger';
 
 const GAME_IS_NOT_RUNNING = 'Игра не запущена';
 const SAVE_STATE_INTERVAL = 30000;
@@ -26,6 +27,9 @@ async function saveGameStateToDatabase(
 
   if (gameState === undefined) {
     clearInterval(interval);
+    logger.info(
+      `Stopped saving game state to database for game with id ${gameId}`
+    );
     return;
   }
 

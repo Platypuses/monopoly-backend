@@ -21,7 +21,7 @@ function isUserNotInGame(gameState: GameStateDto, userId: number): boolean {
   return checkResult;
 }
 
-function isUserNotCurentMovePlayer(
+function isUserNotCurrentMovePlayer(
   gameState: GameStateDto,
   userId: number
 ): boolean {
@@ -33,7 +33,7 @@ export default {
     const lobbyParticipant = await LobbyService.loadLobbyParticipant(userId);
     const { lobby } = lobbyParticipant;
 
-    if (lobby.game === undefined) {
+    if (lobby.game === null) {
       return;
     }
 
@@ -43,7 +43,7 @@ export default {
       throw new ClientError(YOU_ARE_NOT_GAME_PARTICIPANT);
     }
 
-    if (isUserNotCurentMovePlayer(gameState, userId)) {
+    if (isUserNotCurrentMovePlayer(gameState, userId)) {
       throw new ClientError(NOT_YOUR_MOVE);
     }
 

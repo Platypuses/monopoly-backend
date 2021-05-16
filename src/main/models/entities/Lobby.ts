@@ -37,5 +37,5 @@ export default class Lobby {
     cascade: true,
     eager: true,
   })
-  game: Game | undefined;
+  game!: Game | null;
 }

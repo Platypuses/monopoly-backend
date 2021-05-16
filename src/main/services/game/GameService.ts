@@ -67,13 +67,13 @@ export default {
 
     const gameRepository = getRepository(Game);
 
-    if (lobby.game !== undefined) {
+    if (lobby.game !== null) {
       await gameRepository.remove(lobby.game);
     }
 
     const savedGame: Game = await gameRepository.save({
       lobby,
-      stateJson: undefined,
+      stateJson: null,
     });
 
     const gameState = initGameState(savedGame.id, lobby);
@@ -96,7 +96,7 @@ export default {
     const lobbyParticipant = await LobbyService.loadLobbyParticipant(userId);
     const { lobby } = lobbyParticipant;
 
-    if (lobby.game === undefined) {
+    if (lobby.game === null) {
       return;
     }
 
