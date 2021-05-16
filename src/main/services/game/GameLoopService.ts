@@ -1,8 +1,8 @@
 import GameStateDto from '../../models/responses/game/state/GameStateDto';
-import RollDicesEventHandler from './handlers/RollDicesEventHandler';
+import RollDicesEventDispatcher from './dispatchers/RollDicesEventDispatcher';
 
 async function test(gameState: GameStateDto) {
-  await RollDicesEventHandler.handleEvent(gameState);
+  await RollDicesEventDispatcher.dispatchEvent(gameState);
 }
 
 export default {

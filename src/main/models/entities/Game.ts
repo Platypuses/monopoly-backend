@@ -14,7 +14,6 @@ export default class Game {
 
   @OneToOne(() => Lobby, (lobby) => lobby.game, {
     nullable: false,
-    eager: true,
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
   })

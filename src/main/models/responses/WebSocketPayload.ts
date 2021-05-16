@@ -1,6 +1,6 @@
-import GameEventEnum from '../enums/GameEventEnum';
+import WebSocketEventEnum from '../enums/WebSocketEventEnum';
 
 export default interface WebSocketPayloadDto<PayloadType> {
-  event: GameEventEnum;
+  event: WebSocketEventEnum;
   payload: PayloadType;
 }

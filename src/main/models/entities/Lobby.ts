@@ -15,7 +15,10 @@ export default class Lobby {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: 'enum', enum: LobbyStatus })
+  @Column({
+    type: 'enum',
+    enum: LobbyStatus,
+  })
   status!: LobbyStatus;
 
   @OneToMany(
@@ -30,6 +33,9 @@ export default class Lobby {
   })
   lobbyMessages!: LobbyMessage[];
 
-  @OneToOne(() => Game, (game) => game.lobby, { cascade: true })
-  game!: Game;
+  @OneToOne(() => Game, (game) => game.lobby, {
+    cascade: true,
+    eager: true,
+  })
+  game: Game | undefined;
 }

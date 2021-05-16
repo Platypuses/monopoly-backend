@@ -69,6 +69,11 @@ export default {
     const { lobby } = lobbyParticipant;
 
     const gameRepository = getRepository(Game);
+
+    if (lobby.game !== undefined) {
+      await gameRepository.remove(lobby.game);
+    }
+
     const savedGame: Game = await gameRepository.save({
       lobby,
       stateJson: undefined,
@@ -90,8 +95,9 @@ export default {
     return gameState;
   },
 
-  async getGameState(gameId: number): Promise<GameStateDto> {
-    const game = await getRepository(Game).findOne({ id: gameId });
+  async getGameState(userId: number): Promise<GameStateDto> {
+    const lobbyParticipant = await LobbyService.loadLobbyParticipant(userId);
+    const { game } = lobbyParticipant.lobby;
 
     if (game === undefined || game.stateJson === undefined) {
       throw new ClientError(GAME_DOES_NOT_EXIST);

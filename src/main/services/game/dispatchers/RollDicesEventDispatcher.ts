@@ -1,7 +1,7 @@
 import GameStateDto from '../../../models/responses/game/state/GameStateDto';
 import RollDicesEventPayload from '../../../models/responses/game/events/RollDicesEventPayload';
 import WebSocketPayloadDto from '../../../models/responses/WebSocketPayload';
-import GameEventEnum from '../../../models/enums/GameEventEnum';
+import WebSocketEventEnum from '../../../models/enums/WebSocketEventEnum';
 import WebSocketService from '../../WebSocketService';
 
 const MIN_DICE_NUMBER = 1;
@@ -13,7 +13,7 @@ function generateDiceNumber() {
 }
 
 export default {
-  async handleEvent(gameState: GameStateDto): Promise<void> {
+  async dispatchEvent(gameState: GameStateDto): Promise<void> {
     const firstDiceNumber = generateDiceNumber();
     const secondDiceNumber = generateDiceNumber();
 
@@ -24,7 +24,7 @@ export default {
     };
 
     const webSocketPayload: WebSocketPayloadDto<RollDicesEventPayload> = {
-      event: GameEventEnum.ROLL_DICES,
+      event: WebSocketEventEnum.ROLL_DICES,
       payload: eventPayload,
     };
 

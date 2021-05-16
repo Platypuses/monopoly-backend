@@ -1,4 +1,4 @@
-enum GameEventEnum {
+enum WebSocketEventEnum {
   CURRENT_MOVE_PLAYER_CHANGE = 'CURRENT_MOVE_PLAYER_CHANGE',
   ROLL_DICES = 'ROLL_DICES',
   MOVE_TO_CELL = 'MOVE_TO_CELL',
@@ -11,4 +11,4 @@ enum GameEventEnum {
   PLAYER_BALANCE_CHANGE = 'PLAYER_BALANCE_CHANGE',
 }
 
-export default GameEventEnum;
+export default WebSocketEventEnum;
