@@ -21,6 +21,15 @@ export class GameActionsController extends Controller {
     this.setStatus(StatusCodes.OK);
   }
 
+  @Post('/purchase-accepting')
+  @Security('JWT')
+  public async acceptPurchase(
+    @Request() request: RequestWithUser
+  ): Promise<void> {
+    await this.gameActionsService.acceptPurchase(request.user.id);
+    this.setStatus(StatusCodes.OK);
+  }
+
   @Post('/purchase-declining')
   @Security('JWT')
   public async declinePurchase(
