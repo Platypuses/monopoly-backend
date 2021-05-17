@@ -10,6 +10,8 @@ import CurrentMovePlayerChangeEventDispatcher from './dispatchers/CurrentMovePla
 import PlayerDto from '../../models/responses/game/state/PlayerDto';
 import PlayerAcceptPurchaseEventDispatcher from './dispatchers/PlayerAcceptPurchaseEventDispatcher';
 import PlayerBalanceChangeEventDispatcher from './dispatchers/PlayerBalanceChangeEventDispatcher';
+import CellType from '../../models/enums/CellType';
+import MoveService from './MoveService';
 
 const GAME_IS_NOT_RUNNING = 'Игра не запущена';
 const PLAYER_NOT_FOUND = 'Игрок не найден';
@@ -134,7 +136,24 @@ export default {
       nextCellId
     );
 
-    // TODO
+    const cell = getCellByCellId(gameState, nextCellId);
+    switch (cell.cellType) {
+      case CellType.START:
+        break;
+      case CellType.PROPERTY:
+        MoveService.moveToPropertyCell(gameState, cell);
+        break;
+      case CellType.CHANCE:
+        MoveService.moveToChanceCell(gameState, cell);
+        break;
+      case CellType.TAX:
+        MoveService.moveToTaxCell(gameState, cell);
+        break;
+      case CellType.CORNER:
+        break;
+      default:
+        break;
+    }
   },
 
   changeCurrentMovePlayer(gameState: GameStateDto): void {
