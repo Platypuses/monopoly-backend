@@ -9,10 +9,11 @@ import LobbyService from '../LobbyService';
 import LobbyStatus from '../../models/enums/LobbyStatus';
 import GameCellDto from '../../models/responses/game/state/GameCellDto';
 import GameLoopService from './GameLoopService';
+import CellsUtils from './utils/CellsUtils';
 
 const DEFAULT_BALANCE = 1500;
 const DEFAULT_CELL_ID = 1;
-const CELLS_COUNT = 40;
+// const CELLS_COUNT = 40;
 
 /* eslint-disable no-param-reassign */
 
@@ -40,13 +41,7 @@ function initPlayersList(lobbyParticipants: LobbyParticipant[]): PlayerDto[] {
 }
 
 function initCellsList(): GameCellDto[] {
-  const cellsList: GameCellDto[] = [];
-
-  for (let i = 1; i <= CELLS_COUNT; i++) {
-    cellsList.push({ cellId: i, ownerId: null });
-  }
-
-  return cellsList;
+  return CellsUtils.initCellsList();
 }
 
 function initGameState(gameId: number, lobby: Lobby): GameStateDto {
