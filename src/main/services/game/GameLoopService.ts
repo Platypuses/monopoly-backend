@@ -126,7 +126,8 @@ export default {
     return nextCellId;
   },
 
-  moveToCell(gameState: GameStateDto, nextCellId: number): void {
+  moveToCell(gameState: GameStateDto, nextCellId: number): boolean {
+    let isEndOfTurn = true;
     const player = getCurrentPlayer(gameState);
     player.cellId = nextCellId;
 
@@ -141,7 +142,7 @@ export default {
       case CellType.START:
         break;
       case CellType.PROPERTY:
-        MoveService.moveToPropertyCell(gameState, cell);
+        isEndOfTurn = MoveService.moveToPropertyCell(gameState, cell);
         break;
       case CellType.CHANCE:
         MoveService.moveToChanceCell(gameState, cell);
@@ -154,15 +155,17 @@ export default {
       default:
         break;
     }
+
+    return isEndOfTurn;
   },
 
   changeCurrentMovePlayer(gameState: GameStateDto): void {
-    const currentGameState = this.getState(gameState.gameId);
-    currentGameState.currentMovePlayerId = getNextPlayerId(gameState);
+    // eslint-disable-next-line no-param-reassign
+    gameState.currentMovePlayerId = getNextPlayerId(gameState);
 
     CurrentMovePlayerChangeEventDispatcher.dispatchEvent(
-      currentGameState,
-      currentGameState.currentMovePlayerId
+      gameState,
+      gameState.currentMovePlayerId
     );
   },
 
@@ -186,28 +189,26 @@ export default {
     const cell = getCellByCellId(gameState, cellId);
     cell.ownerId = playerId;
 
-    // eslint-disable-next-line no-param-reassign
-    gameState.currentMovePlayerId = getNextPlayerId(gameState);
-
     PlayerAcceptPurchaseEventDispatcher.dispatchEvent(
       gameState,
       playerId,
       cellId
     );
+
+    this.changeCurrentMovePlayer(gameState);
   },
 
   declinePurchase(gameState: GameStateDto): void {
     const playerId = gameState.currentMovePlayerId;
     const cellId = this.getCellIdByPlayerId(gameState, playerId);
 
-    // eslint-disable-next-line no-param-reassign
-    gameState.currentMovePlayerId = getNextPlayerId(gameState);
-
     PlayerDeclinePurchaseEventDispatcher.dispatchEvent(
       gameState,
       playerId,
       cellId
     );
+
+    this.changeCurrentMovePlayer(gameState);
   },
 
   getCellIdByPlayerId(gameState: GameStateDto, playerId: number): number {

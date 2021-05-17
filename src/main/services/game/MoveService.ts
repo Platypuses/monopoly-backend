@@ -4,8 +4,10 @@ import PlayerOnVacantPropertyEventDispatcher from './dispatchers/PlayerOnVacantP
 import PlayerPurchaseOfferEventDispatcher from './dispatchers/PlayerPurchaseOfferEventDispatcher';
 import PlayerBalanceChangeEventDispatcher from './dispatchers/PlayerBalanceChangeEventDispatcher';
 import PlayerOnTaxCellEventDispatcher from './dispatchers/PlayerOnTaxCellEventDispatcher';
+import ChanceService from './ChanceService';
+import PlayerOnChanceCellEventDispatcher from './dispatchers/PlayerOnChanceCellEventDispatcher';
 
-const TAX = 100;
+const TAX = -100;
 const TAX_DESCRIPTION = 'Заплати налог!';
 
 function offerToByProperty(gameState: GameStateDto, cell: GameCellDto) {
@@ -44,14 +46,35 @@ function payRent(gameState: GameStateDto, cell: GameCellDto) {
 }
 
 export default {
-  moveToPropertyCell(gameState: GameStateDto, cell: GameCellDto): void {
+  moveToPropertyCell(gameState: GameStateDto, cell: GameCellDto): boolean {
+    let isEndOfTurn: boolean;
     if (cell.ownerId == null) {
       offerToByProperty(gameState, cell);
+      isEndOfTurn = false;
     } else {
       payRent(gameState, cell);
+      isEndOfTurn = true;
     }
+
+    return isEndOfTurn;
   },
-  moveToChanceCell(gameState: GameStateDto, cell: GameCellDto): void {},
+
+  moveToChanceCell(gameState: GameStateDto, cell: GameCellDto): void {
+    const chance = ChanceService.getChance();
+
+    PlayerOnChanceCellEventDispatcher.dispatchEvent(
+      gameState,
+      gameState.currentMovePlayerId,
+      cell.cellId,
+      chance.text
+    );
+
+    PlayerBalanceChangeEventDispatcher.dispatchEvent(
+      gameState,
+      gameState.currentMovePlayerId,
+      chance.cost
+    );
+  },
 
   moveToTaxCell(gameState: GameStateDto, cell: GameCellDto): void {
     PlayerOnTaxCellEventDispatcher.dispatchEvent(

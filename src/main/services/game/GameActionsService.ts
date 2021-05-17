@@ -81,12 +81,12 @@ export default {
     );
 
     const move = GameLoopService.rollDices(gameState);
-
     const nextCellId = GameLoopService.getNextCellId(gameState, cellId, move);
+    const isEndOfTurn = GameLoopService.moveToCell(gameState, nextCellId);
 
-    GameLoopService.moveToCell(gameState, nextCellId);
-
-    GameLoopService.changeCurrentMovePlayer(gameState);
+    if (isEndOfTurn) {
+      GameLoopService.changeCurrentMovePlayer(gameState);
+    }
   },
 
   async acceptPurchase(userId: number): Promise<void> {

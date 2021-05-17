@@ -10,6 +10,7 @@ import LobbyStatus from '../../models/enums/LobbyStatus';
 import GameCellDto from '../../models/responses/game/state/GameCellDto';
 import GameLoopService from './GameLoopService';
 import CellsUtils from './utils/CellsUtils';
+import ChanceService from './ChanceService';
 
 const DEFAULT_BALANCE = 1500;
 const DEFAULT_CELL_ID = 1;
@@ -46,6 +47,7 @@ function initCellsList(): GameCellDto[] {
 
 function initGameState(gameId: number, lobby: Lobby): GameStateDto {
   const players = shufflePlayers(initPlayersList(lobby.lobbyParticipants));
+  ChanceService.initChancesList();
 
   return {
     gameId,
