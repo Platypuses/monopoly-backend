@@ -12,6 +12,7 @@ import PlayerAcceptPurchaseEventDispatcher from './dispatchers/PlayerAcceptPurch
 import PlayerBalanceChangeEventDispatcher from './dispatchers/PlayerBalanceChangeEventDispatcher';
 import CellType from '../../models/enums/CellType';
 import MoveService from './MoveService';
+import StartOfTheGameEventDispatcher from './dispatchers/StartOfTheGameEventDispatcher';
 
 const GAME_IS_NOT_RUNNING = 'Игра не запущена';
 const PLAYER_NOT_FOUND = 'Игрок не найден';
@@ -89,7 +90,8 @@ export default {
       SAVE_STATE_INTERVAL
     );
 
-    // setInterval(() => testBalanceChange(gameState), 5000);
+    StartOfTheGameEventDispatcher.dispatchEvent(gameState);
+
     CurrentMovePlayerChangeEventDispatcher.dispatchEvent(
       gameState,
       gameState.currentMovePlayerId
