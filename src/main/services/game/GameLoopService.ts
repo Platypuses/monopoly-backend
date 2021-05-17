@@ -17,15 +17,16 @@ import StartOfTheGameEventDispatcher from './dispatchers/StartOfTheGameEventDisp
 const GAME_IS_NOT_RUNNING = 'Игра не запущена';
 const PLAYER_NOT_FOUND = 'Игрок не найден';
 const CELL_NOT_FOUND = 'Клетка не найдена';
+
 const SAVE_STATE_INTERVAL = 30000;
 
 const REWARD_FOR_PASSING_START_CELL = 200;
 
-const gamesStatesMap = new Map<number, GameStateDto>();
-
 const MIN_DICE_NUMBER = 1;
 const MAX_DICE_NUMBER = 6;
 const MAX_MINUS_MIN = MAX_DICE_NUMBER - MIN_DICE_NUMBER;
+
+const gamesStatesMap = new Map<number, GameStateDto>();
 
 function generateDiceNumber() {
   return Math.floor(Math.random() * (MAX_MINUS_MIN + 1)) + MIN_DICE_NUMBER;

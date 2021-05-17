@@ -48,6 +48,7 @@ function payRent(gameState: GameStateDto, cell: GameCellDto) {
 export default {
   moveToPropertyCell(gameState: GameStateDto, cell: GameCellDto): boolean {
     let isEndOfTurn: boolean;
+
     if (cell.ownerId == null) {
       offerToByProperty(gameState, cell);
       isEndOfTurn = false;
