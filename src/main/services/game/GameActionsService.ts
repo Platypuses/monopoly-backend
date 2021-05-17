@@ -6,6 +6,7 @@ import LobbyService from '../LobbyService';
 const NO_ACTIVE_GAME = 'Не найдено активных игр';
 const YOU_ARE_NOT_GAME_PARTICIPANT = 'Вы не участник игры';
 const NOT_YOUR_MOVE = 'Не ваш ход';
+const CELL_NOT_FREE = 'Клетка уже находится в собственности';
 
 function isUserNotInGame(gameState: GameStateDto, userId: number): boolean {
   let checkResult = true;
@@ -29,6 +30,19 @@ function isUserNotCurrentMovePlayer(
   return gameState.currentMovePlayerId !== userId;
 }
 
+function isCellNotFree(gameState: GameStateDto): boolean {
+  const currentPlayerID = gameState.currentMovePlayerId;
+  const currentCellId = GameLoopService.getCellIdByPlayerId(
+    gameState,
+    currentPlayerID
+  );
+  const cellOwnerId = GameLoopService.getOwnerIdByCellId(
+    gameState,
+    currentCellId
+  );
+  return cellOwnerId !== null;
+}
+
 function validatePlayer(gameState: GameStateDto, userId: number) {
   if (isUserNotInGame(gameState, userId)) {
     throw new ClientError(YOU_ARE_NOT_GAME_PARTICIPANT);
@@ -36,6 +50,12 @@ function validatePlayer(gameState: GameStateDto, userId: number) {
 
   if (isUserNotCurrentMovePlayer(gameState, userId)) {
     throw new ClientError(NOT_YOUR_MOVE);
+  }
+}
+
+function validateCell(gameState: GameStateDto) {
+  if (isCellNotFree(gameState)) {
+    throw new ClientError(CELL_NOT_FREE);
   }
 }
 
@@ -67,6 +87,13 @@ export default {
     GameLoopService.moveToCell(gameState, nextCellId);
 
     GameLoopService.changeCurrentMovePlayer(gameState);
+  },
+
+  async acceptPurchase(userId: number): Promise<void> {
+    const gameState = await getGameStateByPlayerId(userId);
+    validatePlayer(gameState, userId);
+    validateCell(gameState);
+    GameLoopService.acceptPurchase(gameState);
   },
 
   async declinePurchase(userId: number): Promise<void> {

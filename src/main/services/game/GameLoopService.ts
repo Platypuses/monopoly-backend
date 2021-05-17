@@ -1,6 +1,6 @@
 import GameStateDto from '../../models/responses/game/state/GameStateDto';
+import GameCellDto from '../../models/responses/game/state/GameCellDto';
 import RollDicesEventDispatcher from './dispatchers/RollDicesEventDispatcher';
-import PlayerBalanceChangeEventDispatcher from './dispatchers/PlayerBalanceChangeEventDispatcher';
 import ClientError from '../../models/error/ClientError';
 import GameService from './GameService';
 import logger from '../../config/logger';
@@ -8,9 +8,12 @@ import PlayerDeclinePurchaseEventDispatcher from './dispatchers/PlayerDeclinePur
 import MoveToCellEventDispatcher from './dispatchers/MoveToCellEventDispatcher';
 import CurrentMovePlayerChangeEventDispatcher from './dispatchers/CurrentMovePlayerChangeEventDispatcher';
 import PlayerDto from '../../models/responses/game/state/PlayerDto';
+import PlayerAcceptPurchaseEventDispatcher from './dispatchers/PlayerAcceptPurchaseEventDispatcher';
+import PlayerBalanceChangeEventDispatcher from './dispatchers/PlayerBalanceChangeEventDispatcher';
 
 const GAME_IS_NOT_RUNNING = 'Игра не запущена';
 const PLAYER_NOT_FOUND = 'Игрок не найден';
+const CELL_NOT_FOUND = 'Клетка не найдена';
 const SAVE_STATE_INTERVAL = 30000;
 
 const REWARD_FOR_PASSING_START_CELL = 200;
@@ -24,15 +27,6 @@ const MAX_MINUS_MIN = MAX_DICE_NUMBER - MIN_DICE_NUMBER;
 function generateDiceNumber() {
   return Math.floor(Math.random() * (MAX_MINUS_MIN + 1)) + MIN_DICE_NUMBER;
 }
-
-// function testBalanceChange(gameState: GameStateDto) {
-//   const randomBalanceDelta = Math.floor(Math.random() * 201) - 100;
-//   PlayerBalanceChangeEventDispatcher.dispatchEvent(
-//     gameState,
-//     gameState.players[0].playerId,
-//     randomBalanceDelta
-//   );
-// }
 
 async function saveGameStateToDatabase(
   gameId: number,
@@ -76,20 +70,12 @@ function getNextPlayerId(gameState: GameStateDto): number {
   return nextPlayerUserId;
 }
 
-function getCellIdByPlayerId(
-  gameState: GameStateDto,
-  playerId: number
-): number {
-  const playerById = gameState.players.find(
-    (player) => player.playerId === playerId
-  );
-
-  if (playerById === undefined) {
-    throw new ClientError(PLAYER_NOT_FOUND);
+function getCellByCellId(gameState: GameStateDto, cellId: number): GameCellDto {
+  const cellById = gameState.cells.find((cell) => cell.cellId === cellId);
+  if (cellById === undefined) {
+    throw new ClientError(CELL_NOT_FOUND);
   }
-  const { cellId } = playerById;
-
-  return cellId;
+  return cellById;
 }
 
 export default {
@@ -120,10 +106,6 @@ export default {
     }
 
     return gameState;
-  },
-
-  getCellIdByPlayerId(gameState: GameStateDto, playerId: number): number {
-    return getCellIdByPlayerId(gameState, playerId);
   },
 
   getNextCellId(gameState: GameStateDto, cellId: number, move: number): number {
@@ -178,9 +160,26 @@ export default {
     return firstDiceNumber + secondDiceNumber;
   },
 
+  acceptPurchase(gameState: GameStateDto): void {
+    const playerId = gameState.currentMovePlayerId;
+
+    const cellId = this.getCellIdByPlayerId(gameState, playerId);
+    const cell = getCellByCellId(gameState, cellId);
+    cell.ownerId = playerId;
+
+    // eslint-disable-next-line no-param-reassign
+    gameState.currentMovePlayerId = getNextPlayerId(gameState);
+
+    PlayerAcceptPurchaseEventDispatcher.dispatchEvent(
+      gameState,
+      playerId,
+      cellId
+    );
+  },
+
   declinePurchase(gameState: GameStateDto): void {
     const playerId = gameState.currentMovePlayerId;
-    const cellId = getCellIdByPlayerId(gameState, playerId);
+    const cellId = this.getCellIdByPlayerId(gameState, playerId);
 
     // eslint-disable-next-line no-param-reassign
     gameState.currentMovePlayerId = getNextPlayerId(gameState);
@@ -190,5 +189,24 @@ export default {
       playerId,
       cellId
     );
+  },
+
+  getCellIdByPlayerId(gameState: GameStateDto, playerId: number): number {
+    const playerById = gameState.players.find(
+      (player) => player.playerId === playerId
+    );
+
+    if (playerById === undefined) {
+      throw new ClientError(PLAYER_NOT_FOUND);
+    }
+    const { cellId } = playerById;
+
+    return cellId;
+  },
+
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  getOwnerIdByCellId(gameState: GameStateDto, cellId: number) {
+    const cellById = getCellByCellId(gameState, cellId);
+    return cellById.ownerId;
   },
 };
