@@ -5,14 +5,32 @@ import ClientError from '../../models/error/ClientError';
 import GameService from './GameService';
 import logger from '../../config/logger';
 import PlayerDeclinePurchaseEventDispatcher from './dispatchers/PlayerDeclinePurchaseEventDispatcher';
+import MoveToCellEventDispatcher from './dispatchers/MoveToCellEventDispatcher';
+import CurrentMovePlayerChangeEventDispatcher from './dispatchers/CurrentMovePlayerChangeEventDispatcher';
+import PlayerDto from '../../models/responses/game/state/PlayerDto';
 import PlayerAcceptPurchaseEventDispatcher from './dispatchers/PlayerAcceptPurchaseEventDispatcher';
+import PlayerBalanceChangeEventDispatcher from './dispatchers/PlayerBalanceChangeEventDispatcher';
+import CellType from '../../models/enums/CellType';
+import MoveService from './MoveService';
+import StartOfTheGameEventDispatcher from './dispatchers/StartOfTheGameEventDispatcher';
 
 const GAME_IS_NOT_RUNNING = 'Игра не запущена';
 const PLAYER_NOT_FOUND = 'Игрок не найден';
 const CELL_NOT_FOUND = 'Клетка не найдена';
+
 const SAVE_STATE_INTERVAL = 30000;
 
+const REWARD_FOR_PASSING_START_CELL = 200;
+
+const MIN_DICE_NUMBER = 1;
+const MAX_DICE_NUMBER = 6;
+const MAX_MINUS_MIN = MAX_DICE_NUMBER - MIN_DICE_NUMBER;
+
 const gamesStatesMap = new Map<number, GameStateDto>();
+
+function generateDiceNumber() {
+  return Math.floor(Math.random() * (MAX_MINUS_MIN + 1)) + MIN_DICE_NUMBER;
+}
 
 async function saveGameStateToDatabase(
   gameId: number,
@@ -29,6 +47,14 @@ async function saveGameStateToDatabase(
   }
 
   await GameService.saveGameState(gameState);
+}
+
+function getCurrentPlayer(gameState: GameStateDto): PlayerDto {
+  const index = gameState.players.findIndex(
+    (player) => player.playerId === gameState.currentMovePlayerId
+  );
+
+  return gameState.players[index];
 }
 
 function getNextPlayerId(gameState: GameStateDto): number {
@@ -64,6 +90,13 @@ export default {
       async () => saveGameStateToDatabase(gameState.gameId, interval),
       SAVE_STATE_INTERVAL
     );
+
+    StartOfTheGameEventDispatcher.dispatchEvent(gameState);
+
+    CurrentMovePlayerChangeEventDispatcher.dispatchEvent(
+      gameState,
+      gameState.currentMovePlayerId
+    );
   },
 
   stop(gameId: number): void {
@@ -80,8 +113,76 @@ export default {
     return gameState;
   },
 
-  rollDices(gameState: GameStateDto): void {
-    RollDicesEventDispatcher.dispatchEvent(gameState);
+  getNextCellId(gameState: GameStateDto, cellId: number, move: number): number {
+    let nextCellId = cellId + move;
+
+    // прохождение через клетку вперед
+    if (nextCellId > 40) {
+      nextCellId = (nextCellId % 40) + 1;
+      PlayerBalanceChangeEventDispatcher.dispatchEvent(
+        gameState,
+        gameState.currentMovePlayerId,
+        REWARD_FOR_PASSING_START_CELL
+      );
+    }
+
+    return nextCellId;
+  },
+
+  moveToCell(gameState: GameStateDto, nextCellId: number): boolean {
+    let isEndOfTurn = true;
+    const player = getCurrentPlayer(gameState);
+    player.cellId = nextCellId;
+
+    MoveToCellEventDispatcher.dispatchEvent(
+      gameState,
+      gameState.currentMovePlayerId,
+      nextCellId
+    );
+
+    const cell = getCellByCellId(gameState, nextCellId);
+    switch (cell.cellType) {
+      case CellType.START:
+        break;
+      case CellType.PROPERTY:
+        isEndOfTurn = MoveService.moveToPropertyCell(gameState, cell);
+        break;
+      case CellType.CHANCE:
+        MoveService.moveToChanceCell(gameState, cell);
+        break;
+      case CellType.TAX:
+        MoveService.moveToTaxCell(gameState, cell);
+        break;
+      case CellType.CORNER:
+        break;
+      default:
+        break;
+    }
+
+    return isEndOfTurn;
+  },
+
+  changeCurrentMovePlayer(gameState: GameStateDto): void {
+    // eslint-disable-next-line no-param-reassign
+    gameState.currentMovePlayerId = getNextPlayerId(gameState);
+
+    CurrentMovePlayerChangeEventDispatcher.dispatchEvent(
+      gameState,
+      gameState.currentMovePlayerId
+    );
+  },
+
+  rollDices(gameState: GameStateDto): number {
+    const firstDiceNumber = generateDiceNumber();
+    const secondDiceNumber = generateDiceNumber();
+
+    RollDicesEventDispatcher.dispatchEvent(
+      gameState,
+      firstDiceNumber,
+      secondDiceNumber
+    );
+
+    return firstDiceNumber + secondDiceNumber;
   },
 
   acceptPurchase(gameState: GameStateDto): void {
@@ -91,28 +192,26 @@ export default {
     const cell = getCellByCellId(gameState, cellId);
     cell.ownerId = playerId;
 
-    // eslint-disable-next-line no-param-reassign
-    gameState.currentMovePlayerId = getNextPlayerId(gameState);
-
     PlayerAcceptPurchaseEventDispatcher.dispatchEvent(
       gameState,
       playerId,
       cellId
     );
+
+    this.changeCurrentMovePlayer(gameState);
   },
 
   declinePurchase(gameState: GameStateDto): void {
     const playerId = gameState.currentMovePlayerId;
     const cellId = this.getCellIdByPlayerId(gameState, playerId);
 
-    // eslint-disable-next-line no-param-reassign
-    gameState.currentMovePlayerId = getNextPlayerId(gameState);
-
     PlayerDeclinePurchaseEventDispatcher.dispatchEvent(
       gameState,
       playerId,
       cellId
     );
+
+    this.changeCurrentMovePlayer(gameState);
   },
 
   getCellIdByPlayerId(gameState: GameStateDto, playerId: number): number {

@@ -9,18 +9,11 @@ const NOT_YOUR_MOVE = 'Не ваш ход';
 const CELL_NOT_FREE = 'Клетка уже находится в собственности';
 
 function isUserNotInGame(gameState: GameStateDto, userId: number): boolean {
-  let checkResult = true;
+  const playerInGame = gameState.players.find(
+    (player) => player.playerId === userId
+  );
 
-  for (let i = 0; i < gameState.players.length; i++) {
-    const player = gameState.players[i];
-
-    if (player.playerId === userId) {
-      checkResult = false;
-      break;
-    }
-  }
-
-  return checkResult;
+  return playerInGame === undefined;
 }
 
 function isUserNotCurrentMovePlayer(
@@ -74,7 +67,19 @@ export default {
   async rollDices(userId: number): Promise<void> {
     const gameState = await getGameStateByPlayerId(userId);
     validatePlayer(gameState, userId);
-    GameLoopService.rollDices(gameState);
+
+    const cellId = GameLoopService.getCellIdByPlayerId(
+      gameState,
+      gameState.currentMovePlayerId
+    );
+
+    const move = GameLoopService.rollDices(gameState);
+    const nextCellId = GameLoopService.getNextCellId(gameState, cellId, move);
+    const isEndOfTurn = GameLoopService.moveToCell(gameState, nextCellId);
+
+    if (isEndOfTurn) {
+      GameLoopService.changeCurrentMovePlayer(gameState);
+    }
   },
 
   async acceptPurchase(userId: number): Promise<void> {
