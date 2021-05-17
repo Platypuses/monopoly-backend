@@ -54,7 +54,19 @@ export default {
   async rollDices(userId: number): Promise<void> {
     const gameState = await getGameStateByPlayerId(userId);
     validatePlayer(gameState, userId);
-    GameLoopService.rollDices(gameState);
+
+    const cellId = GameLoopService.getCellIdByPlayerId(
+      gameState,
+      gameState.currentMovePlayerId
+    );
+
+    const move = GameLoopService.rollDices(gameState);
+
+    const nextCellId = GameLoopService.getNextCellId(gameState, cellId, move);
+
+    GameLoopService.moveToCell(gameState, nextCellId);
+
+    GameLoopService.changeCurrentMovePlayer(gameState);
   },
 
   async declinePurchase(userId: number): Promise<void> {
