@@ -6,9 +6,12 @@ import PlayerBalanceChangeEventDispatcher from './dispatchers/PlayerBalanceChang
 import PlayerOnTaxCellEventDispatcher from './dispatchers/PlayerOnTaxCellEventDispatcher';
 import ChanceService from './ChanceService';
 import PlayerOnChanceCellEventDispatcher from './dispatchers/PlayerOnChanceCellEventDispatcher';
+import GameLoopService from './GameLoopService';
 
-const TAX = -100;
+const TAX_AMOUNT = 100;
 const TAX_DESCRIPTION = 'Заплати налог!';
+
+/* eslint-disable no-param-reassign */
 
 function offerToByProperty(gameState: GameStateDto, cell: GameCellDto) {
   PlayerOnVacantPropertyEventDispatcher.dispatchEvent(
@@ -32,12 +35,14 @@ function payRent(gameState: GameStateDto, cell: GameCellDto) {
     return;
   }
 
+  GameLoopService.getCurrentPlayer(gameState).balance -= cell.rent;
   PlayerBalanceChangeEventDispatcher.dispatchEvent(
     gameState,
     gameState.currentMovePlayerId,
-    cell.rent
+    -cell.rent
   );
 
+  GameLoopService.getPlayerById(gameState, cell.ownerId).balance += cell.rent;
   PlayerBalanceChangeEventDispatcher.dispatchEvent(
     gameState,
     cell.ownerId,
@@ -70,6 +75,7 @@ export default {
       chance.text
     );
 
+    GameLoopService.getCurrentPlayer(gameState).balance += chance.cost;
     PlayerBalanceChangeEventDispatcher.dispatchEvent(
       gameState,
       gameState.currentMovePlayerId,
@@ -85,10 +91,11 @@ export default {
       TAX_DESCRIPTION
     );
 
+    GameLoopService.getCurrentPlayer(gameState).balance -= TAX_AMOUNT;
     PlayerBalanceChangeEventDispatcher.dispatchEvent(
       gameState,
       gameState.currentMovePlayerId,
-      TAX
+      -TAX_AMOUNT
     );
   },
 };

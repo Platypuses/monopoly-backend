@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import GameStateDto from '../../models/responses/game/state/GameStateDto';
 import GameCellDto from '../../models/responses/game/state/GameCellDto';
 import RollDicesEventDispatcher from './dispatchers/RollDicesEventDispatcher';
@@ -47,14 +48,6 @@ async function saveGameStateToDatabase(
   }
 
   await GameService.saveGameState(gameState);
-}
-
-function getCurrentPlayer(gameState: GameStateDto): PlayerDto {
-  const index = gameState.players.findIndex(
-    (player) => player.playerId === gameState.currentMovePlayerId
-  );
-
-  return gameState.players[index];
 }
 
 function getNextPlayerId(gameState: GameStateDto): number {
@@ -119,6 +112,8 @@ export default {
     // прохождение через клетку вперед
     if (nextCellId > 40) {
       nextCellId = (nextCellId % 40) + 1;
+
+      this.getCurrentPlayer(gameState).balance += REWARD_FOR_PASSING_START_CELL;
       PlayerBalanceChangeEventDispatcher.dispatchEvent(
         gameState,
         gameState.currentMovePlayerId,
@@ -131,7 +126,7 @@ export default {
 
   moveToCell(gameState: GameStateDto, nextCellId: number): boolean {
     let isEndOfTurn = true;
-    const player = getCurrentPlayer(gameState);
+    const player = this.getCurrentPlayer(gameState);
     player.cellId = nextCellId;
 
     MoveToCellEventDispatcher.dispatchEvent(
@@ -163,7 +158,6 @@ export default {
   },
 
   changeCurrentMovePlayer(gameState: GameStateDto): void {
-    // eslint-disable-next-line no-param-reassign
     gameState.currentMovePlayerId = getNextPlayerId(gameState);
 
     CurrentMovePlayerChangeEventDispatcher.dispatchEvent(
@@ -196,6 +190,17 @@ export default {
       gameState,
       playerId,
       cellId
+    );
+
+    if (cell.price == null) {
+      return;
+    }
+
+    this.getCurrentPlayer(gameState).balance -= cell.price;
+    PlayerBalanceChangeEventDispatcher.dispatchEvent(
+      gameState,
+      playerId,
+      -cell.price
     );
 
     this.changeCurrentMovePlayer(gameState);
@@ -231,5 +236,21 @@ export default {
   getOwnerIdByCellId(gameState: GameStateDto, cellId: number) {
     const cellById = getCellByCellId(gameState, cellId);
     return cellById.ownerId;
+  },
+
+  getPlayerById(gameState: GameStateDto, playerId: number): PlayerDto {
+    const index = gameState.players.findIndex(
+      (player) => player.playerId === playerId
+    );
+
+    return gameState.players[index];
+  },
+
+  getCurrentPlayer(gameState: GameStateDto): PlayerDto {
+    const index = gameState.players.findIndex(
+      (player) => player.playerId === gameState.currentMovePlayerId
+    );
+
+    return gameState.players[index];
   },
 };
